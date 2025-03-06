@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flood Alert System</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img src="/static/img/logo.svg" alt="Logo" class="logo">
+                <h2>Flood Alert</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="active" >
+                        <a href="/static/index.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                    </li>
+                    <li>
+                        <a href="/static/sensors.html"><i class="fas fa-water"></i> Sensors</a>
+                    </li>
+                    <li >
+                        <a href="/static/alerts.html"><i class="fas fa-bell"></i> Alerts</a>
+                    </li>
+                    <li>
+                        <a href="/static/analytics.html"><i class="fas fa-chart-line"></i> Analytics</a>
+                    </li>
+                    <li>
+                        <a href="/static/settings.html"><i class="fas fa-cog"></i> Settings</a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="network-status">
+                    <div id="network-indicator" class="indicator online"></div>
+                    <span id="network-text">Network Online</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="content-header">
+                <div class="header-title">
+                    <h1>Dashboard</h1>
+                    <p id="last-updated">Last updated: Just now</p>
+                </div>
+                <div class="header-actions">
+                    <button id="refresh-btn" class="btn btn-light"><i class="fas fa-sync-alt"></i> Refresh</button>
+                    <div class="system-time" id="system-time">00:00:00</div>
+                </div>
+            </header>
+
+            <!-- Status Overview -->
+            <section class="status-overview">
+                <div class="status-card">
+                    <div class="status-icon bg-primary">
+                        <i class="fas fa-water"></i>
+                    </div>
+                    <div class="status-info">
+                        <h3>Active Sensors</h3>
+                        <div class="status-value" id="active-sensors-count">0</div>
+                    </div>
+                </div>
+                <div class="status-card">
+                    <div class="status-icon bg-success">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="status-info">
+                        <h3>Normal Status</h3>
+                        <div class="status-value" id="normal-count">0</div>
+                    </div>
+                </div>
+                <div class="status-card">
+                    <div class="status-icon bg-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="status-info">
+                        <h3>Warnings</h3>
+                        <div class="status-value" id="warning-count">0</div>
+                    </div>
+                </div>
+                <div class="status-card">
+                    <div class="status-icon bg-danger">
+                        <i class="fas fa-radiation"></i>
+                    </div>
+                    <div class="status-info">
+                        <h3>Alerts</h3>
+                        <div class="status-value" id="alert-count">0</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Main Dashboard Panels -->
+            <div class="dashboard-panels">
+                <!-- Sensor Status Panel -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2><i class="fas fa-water"></i> Sensor Status</h2>
+                        <div class="panel-actions">
+                            <button class="btn-icon" id="expand-sensors" title="Expand Sensors"><i class="fas fa-expand"></i></button>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div id="sensors-container" class="sensors-grid">
+                            <!-- Sensors will be loaded here dynamically -->
+                            <div class="loading-spinner">
+                                <i class="fas fa-spinner fa-spin"></i>
+                                <span>Loading sensors...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Water Level Visualization Panel -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2><i class="fas fa-chart-bar"></i> Water Levels</h2>
+                        <div class="panel-actions">
+                            <button class="btn-icon" id="expand-chart" title="Expand Chart"><i class="fas fa-expand"></i></button>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="chart-container">
+                            <canvas id="water-level-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Status Panel -->
+            <div class="panel">
+                <div class="panel-header">
+                    <h2><i class="fas fa-server"></i> System Status</h2>
+                </div>
+                <div class="panel-body">
+                    <div class="system-stats">
+                        <div class="stat-item">
+                            <span class="stat-label">Device Name:</span>
+                            <span class="stat-value" id="device-name">-</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">MAC Address:</span>
+                            <span class="stat-value" id="device-mac">-</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">AP IP Address:</span>
+                            <span class="stat-value" id="ap-ip">-</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">WiFi Status:</span>
+                            <span class="stat-value" id="wifi-status">-</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Uptime:</span>
+                            <span class="stat-value" id="system-uptime">-</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Connected Peers:</span>
+                            <span class="stat-value" id="connected-peers">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal for expanded view -->
+    <div id="modal-container" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Sensor Details</h2>
+                <button id="modal-close" class="btn-icon" title="Close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <!-- Modal content will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chart.js/3.9.1/chart.min.js"></script>
+    <script src="/static/js/dashboard.js"></script>
+</body>
+</html>

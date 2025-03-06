@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flood Alert System - Alerts</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img src="/static/img/logo.svg" alt="Logo" class="logo">
+                <h2>Flood Alert</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li>
+                        <a href="/static/index.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                    </li>
+                    <li>
+                        <a href="/static/sensors.html"><i class="fas fa-water"></i> Sensors</a>
+                    </li>
+                    <li class="active">
+                        <a href="/static/alerts.html"><i class="fas fa-bell"></i> Alerts</a>
+                    </li>
+                    <li>
+                        <a href="/static/analytics.html"><i class="fas fa-chart-line"></i> Analytics</a>
+                    </li>
+                    <li>
+                        <a href="/static/settings.html"><i class="fas fa-cog"></i> Settings</a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="network-status">
+                    <div id="network-indicator" class="indicator online"></div>
+                    <span id="network-text">Network Online</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="content-header">
+                <div class="header-title">
+                    <h1>Alerts Management</h1>
+                    <p id="last-updated">Last updated: Just now</p>
+                </div>
+                <div class="header-actions">
+                    <button id="refresh-btn" class="btn btn-light"><i class="fas fa-sync-alt"></i> Refresh</button>
+                    <div class="system-time" id="system-time">00:00:00</div>
+                </div>
+            </header>
+
+            <!-- Active Alerts -->
+            <div class="panel">
+                <div class="panel-header alert-header">
+                    <h2><i class="fas fa-exclamation-triangle"></i> Active Alerts</h2>
+                    <div class="panel-actions">
+                        <button id="test-alert-btn" class="btn btn-warning"><i class="fas fa-bell"></i> Test Alert</button>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <div id="active-alerts-container">
+                        <div class="alert-card bg-danger animate__animated animate__pulse animate__infinite">
+                            <div class="alert-icon">
+                                <i class="fas fa-radiation"></i>
+                            </div>
+                            <div class="alert-content">
+                                <h3 class="alert-title">Critical Water Level</h3>
+                                <p class="alert-description">Sensor 2 has reported a critical water level of 85.5 cm.</p>
+                                <div class="alert-meta">
+                                    <span class="alert-time">5 minutes ago</span>
+                                    <span class="alert-source">Sensor 2 (AA:BB:CC:DD:EE:FF)</span>
+                                </div>
+                            </div>
+                            <div class="alert-actions">
+                                <button class="btn btn-sm btn-light"><i class="fas fa-check"></i> Acknowledge</button>
+                                <button class="btn btn-sm btn-light"><i class="fas fa-times"></i> Dismiss</button>
+                            </div>
+                        </div>
+                        <div class="alert-card bg-warning">
+                            <div class="alert-icon">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <div class="alert-content">
+                                <h3 class="alert-title">Warning: Rising Water Level</h3>
+                                <p class="alert-description">Sensor 3 has reported a rising water level, currently at 65.2 cm.</p>
+                                <div class="alert-meta">
+                                    <span class="alert-time">15 minutes ago</span>
+                                    <span class="alert-source">Sensor 3 (AA:BB:CC:DD:EE:33)</span>
+                                </div>
+                            </div>
+                            <div class="alert-actions">
+                                <button class="btn btn-sm btn-light"><i class="fas fa-check"></i> Acknowledge</button>
+                                <button class="btn btn-sm btn-light"><i class="fas fa-times"></i> Dismiss</button>
+                            </div>
+                        </div>
+                        <div id="no-active-alerts" class="no-data-message hidden">
+                            <i class="fas fa-check-circle"></i>
+                            <p>No active alerts at the moment.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alert History -->
+            <div class="panel">
+                <div class="panel-header">
+                    <h2><i class="fas fa-history"></i> Alert History</h2>
+                    <div class="panel-actions">
+                        <div class="filter-dropdown">
+                            <label for="alert-filter" class="sr-only">Filter Alerts</label>
+                            <select id="alert-filter">
+                                <option value="all">All Alerts</option>
+                                <option value="warning">Warnings</option>
+                                <option value="critical">Critical</option>
+                            </select>
+                            <i class="fas fa-filter"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <div class="alerts-table-container">
+                        <table class="alerts-table">
+                            <thead>
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Description</th>
+                                    <th>Source</th>
+                                    <th>Time</th>
+                                    <th>Duration</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="alerts-history-body">
+                                <tr class="alert-row danger">
+                                    <td><span class="badge bg-danger">Critical</span></td>
+                                    <td>Critical water level (85.5 cm)</td>
+                                    <td>Sensor 2</td>
+                                    <td>2025-03-06 10:15:30</td>
+                                    <td>45 minutes</td>
+                                    <td><span class="badge bg-secondary">Resolved</span></td>
+                                </tr>
+                                <tr class="alert-row warning">
+                                    <td><span class="badge bg-warning">Warning</span></td>
+                                    <td>Rising water level (65.2 cm)</td>
+                                    <td>Sensor 3</td>
+                                    <td>2025-03-06 10:05:12</td>
+                                    <td>20 minutes</td>
+                                    <td><span class="badge bg-secondary">Resolved</span></td>
+                                </tr>
+                                <tr class="alert-row warning">
+                                    <td><span class="badge bg-warning">Warning</span></td>
+                                    <td>Temperature spike (38.5°C)</td>
+                                    <td>Sensor 1</td>
+                                    <td>2025-03-06 09:45:08</td>
+                                    <td>15 minutes</td>
+                                    <td><span class="badge bg-secondary">Resolved</span></td>
+                                </tr>
+                                <tr class="alert-row danger">
+                                    <td><span class="badge bg-danger">Critical</span></td>
+                                    <td>Critical water level (90.2 cm)</td>
+                                    <td>Sensor 4</td>
+                                    <td>2025-03-05 22:30:45</td>
+                                    <td>3 hours</td>
+                                    <td><span class="badge bg-secondary">Resolved</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alert Settings -->
+            <div class="panel">
+                <div class="panel-header">
+                    <h2><i class="fas fa-sliders-h"></i> Alert Configuration</h2>
+                </div>
+                <div class="panel-body">
+                    <div class="settings-grid">
+                        <div class="settings-section">
+                            <h3>Threshold Settings</h3>
+                            <div class="settings-form">
+                                <div class="form-group">
+                                    <label for="warning-threshold">Warning Threshold (cm):</label>
+                                    <input type="number" id="warning-threshold" class="form-control" value="50">
+                                </div>
+                                <div class="form-group">
+                                    <label for="critical-threshold">Critical Threshold (cm):</label>
+                                    <input type="number" id="critical-threshold" class="form-control" value="75">
+                                </div>
+                                <div class="form-group">
+                                    <label for="temp-warning">Temperature Warning (°C):</label>
+                                    <input type="number" id="temp-warning" class="form-control" value="35">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="settings-section">
+                            <h3>Notification Settings</h3>
+                            <div class="settings-form">
+                                <div class="form-group checkbox">
+                                    <input type="checkbox" id="enable-sound" checked>
+                                    <label for="enable-sound">Enable Sound Alerts</label>
+                                </div>
+                                <div class="form-group checkbox">
+                                    <input type="checkbox" id="enable-visual" checked>
+                                    <label for="enable-visual">Enable Visual Alerts</label>
+                                </div>
+                                <div class="form-group checkbox">
+                                    <input type="checkbox" id="enable-email">
+                                    <label for="enable-email">Send Email Notifications</label>
+                                </div>
+                                <div class="form-group">
+                                    <label for="email-address">Email Address:</label>
+                                    <input type="email" id="email-address" class="form-control" placeholder="Enter email address">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="settings-actions">
+                        <button id="save-alert-settings" class="btn btn-primary"><i class="fas fa-save"></i> Save Settings</button>
+                        <button id="reset-alert-settings" class="btn btn-light"><i class="fas fa-undo"></i> Reset to Default</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/static/js/alerts.js"></script>
+</body>
+</html>

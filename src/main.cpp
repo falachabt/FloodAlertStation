@@ -108,12 +108,12 @@ void setup()
   // Initialize the web server
   if (webServer.beginSPIFFS())
   {
-    // Set up web server (AP mode only or AP+STA mode)
-    #ifdef WIFI_SSID
-        webServer.beginAPSTA(AP_SSID, AP_PASSWORD, WIFI_SSID, WIFI_PASSWORD);
-    #else
-        webServer.beginAP(AP_SSID, AP_PASSWORD);
-    #endif
+// Set up web server (AP mode only or AP+STA mode)
+#ifdef WIFI_SSID
+    webServer.beginAPSTA(AP_SSID, AP_PASSWORD, WIFI_SSID, WIFI_PASSWORD);
+#else
+    webServer.beginAP(AP_SSID, AP_PASSWORD);
+#endif
 
     // Enable captive portal to redirect to our web interface
     webServer.enableCaptivePortal();
@@ -160,130 +160,289 @@ void loop()
     printNetworkStatus();
     network.getOwnMac(ownMac);
     Serial.print("Own MAC: ");
-    for (int i = 0; i < 6; i++) {
-        Serial.print(ownMac[i], HEX);
-        if (i < 5) Serial.print(":");
+    for (int i = 0; i < 6; i++)
+    {
+      Serial.print(ownMac[i], HEX);
+      if (i < 5)
+        Serial.print(":");
     }
     Serial.println();
   }
 }
 
 // ===== WEB SERVER SETUP =====
-
 void setupWebServer()
 {
 
   // API endpoint for sensor data
   webServer.on("/api/sensors", HTTP_GET, []()
                {
-        DynamicJsonDocument doc(2048);
-        JsonArray sensorArray = doc.createNestedArray("sensors");
+    DynamicJsonDocument doc(2048);
+    JsonArray sensorArray = doc.createNestedArray("sensors");
+    
+    for (int i = 0; i < MAX_SENSORS; i++) {
+      if (sensors[i].active) {
+        JsonObject sensor = sensorArray.createNestedObject();
+        sensor["name"] = sensors[i].name;
         
-        for (int i = 0; i < MAX_SENSORS; i++) {
-            if (sensors[i].active) {
-                JsonObject sensor = sensorArray.createNestedObject();
-                sensor["name"] = sensors[i].name;
-                
-                // Format MAC address
-                char macStr[18];
-                snprintf(macStr, sizeof(macStr), "%02X:%02X:%02X:%02X:%02X:%02X",
-                        sensors[i].mac[0], sensors[i].mac[1], sensors[i].mac[2],
-                        sensors[i].mac[3], sensors[i].mac[4], sensors[i].mac[5]);
-                sensor["mac"] = macStr;
-                
-                sensor["waterLevel"] = sensors[i].waterLevel;
-                sensor["temperature"] = sensors[i].temperature;
-                sensor["category"] = sensors[i].category;
-                
-                // Calculate time since last seen
-                unsigned long secsSinceLastSeen = (millis() - sensors[i].lastSeen) / 1000;
-                sensor["lastSeenSeconds"] = secsSinceLastSeen;
-                
-                // Category text
-                switch(sensors[i].category) {
-                    case 0: sensor["status"] = "Normal"; break;
-                    case 1: sensor["status"] = "Warning"; break;
-                    case 2: sensor["status"] = "Alert"; break;
-                    default: sensor["status"] = "Unknown";
-                }
-            }
+        // Format MAC address
+        char macStr[18];
+        snprintf(macStr, sizeof(macStr), "%02X:%02X:%02X:%02X:%02X:%02X",
+                sensors[i].mac[0], sensors[i].mac[1], sensors[i].mac[2],
+                sensors[i].mac[3], sensors[i].mac[4], sensors[i].mac[5]);
+        sensor["mac"] = macStr;
+        
+        sensor["waterLevel"] = sensors[i].waterLevel;
+        sensor["temperature"] = sensors[i].temperature;
+        sensor["category"] = sensors[i].category;
+        
+        // Calculate time since last seen
+        unsigned long secsSinceLastSeen = (millis() - sensors[i].lastSeen) / 1000;
+        sensor["lastSeenSeconds"] = secsSinceLastSeen;
+        
+        // Category text
+        switch(sensors[i].category) {
+          case 0: sensor["status"] = "Normal"; break;
+          case 1: sensor["status"] = "Warning"; break;
+          case 2: sensor["status"] = "Alert"; break;
+          default: sensor["status"] = "Unknown";
         }
-        
-        // Add network status
-        doc["networkReady"] = network.isNetworkReady();
-        doc["connectedPeers"] = network.getPeerCount();
-        doc["timestamp"] = millis() / 1000;
-        
-        String jsonResponse;
-        serializeJson(doc, jsonResponse);
-        webServer.getServer().send(200, "application/json", jsonResponse); });
+      }
+    }
+    
+    // Add network status
+    doc["networkReady"] = network.isNetworkReady();
+    doc["connectedPeers"] = network.getPeerCount();
+    doc["timestamp"] = millis() / 1000;
+    
+    String jsonResponse;
+    serializeJson(doc, jsonResponse);
+    webServer.getServer().send(200, "application/json", jsonResponse); });
 
   // System status API
   webServer.on("/api/status", HTTP_GET, []()
                {
-        DynamicJsonDocument doc(512);
-        
-        // Device info
-        uint8_t mac[6];
-        network.getOwnMac(mac);
-        char macStr[18];
-        snprintf(macStr, sizeof(macStr), "%02X:%02X:%02X:%02X:%02X:%02X",
-                mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
-        
-        doc["deviceName"] = DEVICE_NAME;
-        doc["deviceMac"] = macStr;
-        doc["uptime"] = millis() / 1000;
-        
-        // Network info
-        doc["networkReady"] = network.isNetworkReady();
-        doc["connectedPeers"] = network.getPeerCount();
-        doc["minPeers"] = network.getMinPeers();
-        
-        // WiFi info
-        JsonObject wifiInfo = doc.createNestedObject("wifi");
-        wifiInfo["apIP"] = webServer.getAPIP().toString();
-        wifiInfo["apSSID"] = AP_SSID;
-        
-        wifiInfo["staConnected"] = webServer.isConnectedToWiFi();
-        if (webServer.isConnectedToWiFi()) {
-            wifiInfo["staIP"] = webServer.getSTAIP().toString();
+    DynamicJsonDocument doc(512);
+    
+    // Device info
+    uint8_t mac[6];
+    network.getOwnMac(mac);
+    char macStr[18];
+    snprintf(macStr, sizeof(macStr), "%02X:%02X:%02X:%02X:%02X:%02X",
+            mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+    
+    doc["deviceName"] = DEVICE_NAME;
+    doc["deviceMac"] = macStr;
+    doc["uptime"] = millis() / 1000;
+    
+    // Network info
+    doc["networkReady"] = network.isNetworkReady();
+    doc["connectedPeers"] = network.getPeerCount();
+    doc["minPeers"] = network.getMinPeers();
+    
+    // WiFi info
+    JsonObject wifiInfo = doc.createNestedObject("wifi");
+    wifiInfo["apIP"] = webServer.getAPIP().toString();
+    wifiInfo["apSSID"] = AP_SSID;
+    
+    wifiInfo["staConnected"] = webServer.isConnectedToWiFi();
+    if (webServer.isConnectedToWiFi()) {
+      wifiInfo["staIP"] = webServer.getSTAIP().toString();
 #ifdef WIFI_SSID
-            wifiInfo["staSSID"] = WIFI_SSID;
+      wifiInfo["staSSID"] = WIFI_SSID;
 #endif
-            wifiInfo["rssi"] = WiFi.RSSI();
-        }
-        
-        String jsonResponse;
-        serializeJson(doc, jsonResponse);
-        webServer.getServer().send(200, "application/json", jsonResponse); });
+      wifiInfo["rssi"] = WiFi.RSSI();
+    }
+    
+    String jsonResponse;
+    serializeJson(doc, jsonResponse);
+    webServer.getServer().send(200, "application/json", jsonResponse); });
 
-  // Static files
-  // Static files handler - this will catch any request for static files
-  webServer.on("/static", HTTP_GET, []()
+  // API endpoint to list all SPIFFS files
+  webServer.on("/api/files", HTTP_GET, []()
                {
-    // Get the full URI (e.g., /static/css/style.css)
-    String uri = webServer.getServer().uri();
+    DynamicJsonDocument doc(4096);
+    JsonArray filesArray = doc.createNestedArray("files");
     
-    // Try to serve the exact file path from SPIFFS
-    if (webServer.serveFile(uri)) {
-        Serial.println("Served file: " + uri);
+    File root = SPIFFS.open("/");
+    if (!root || !root.isDirectory()) {
+      doc["error"] = "Failed to open SPIFFS root directory";
+    } else {
+      File file = root.openNextFile();
+      int fileCount = 0;
+      
+      // Get filesystem info
+      size_t totalBytes = SPIFFS.totalBytes();
+      size_t usedBytes = SPIFFS.usedBytes();
+      
+      doc["totalSpace"] = totalBytes;
+      doc["usedSpace"] = usedBytes;
+      doc["freeSpace"] = totalBytes - usedBytes;
+      
+      while (file) {
+        JsonObject fileObj = filesArray.createNestedObject();
+        fileObj["name"] = file.name();
+        fileObj["size"] = file.size();
+        fileObj["isDirectory"] = file.isDirectory();
+        
+        file = root.openNextFile();
+        fileCount++;
+      }
+      
+      doc["count"] = fileCount;
+    }
+    
+    String jsonResponse;
+    serializeJson(doc, jsonResponse);
+    webServer.getServer().send(200, "application/json", jsonResponse); });
+
+  // Root URL handler
+  webServer.on("/", HTTP_GET, []()
+               {
+    if (webServer.serveFile("/static/index.html")) {
+      Serial.println("Served dashboard page");
+    } else {
+      webServer.getServer().send(200, "text/html", "<h1>Flood Alert System</h1><p>Dashboard not found. Please upload files to SPIFFS.</p>");
+    } });
+
+  // Simple static file handler - handles everything with /static/ in the path
+  webServer.on("/static/(.*)", HTTP_GET, []()
+               {
+    String requestPath = webServer.getServer().uri();
+    Serial.print("Static file request: ");
+    Serial.println(requestPath);
+    
+    // Try serving directly with the exact path
+    if (webServer.serveFile(requestPath)) {
+      Serial.println("Served file with exact path: " + requestPath);
+      return;
+    }
+    
+    // If not found, try without leading slash
+    if (requestPath.startsWith("/")) {
+      String pathWithoutLeadingSlash = requestPath.substring(1);
+      if (webServer.serveFile(pathWithoutLeadingSlash)) {
+        Serial.println("Served file without leading slash: " + pathWithoutLeadingSlash);
         return;
+      }
     }
     
-    // If the file wasn't found at that exact path, try prepending a slash
-    // Some browsers might request /static/style.css but the actual path is /static/style.css
-    if (uri.indexOf("/static/") == 0) {
-        // Extract the filename without /static prefix
-        String filename = uri.substring(7); // Remove "/static"
-        if (webServer.serveFile(filename)) {
-            Serial.println("Served file with modified path: " + filename);
-            return;
-        }
-    }
-    
-    // File not found
-    Serial.println("File not found: " + uri);
+    // If not found, report error
+    Serial.println("File not found: " + requestPath);
     webServer.getServer().send(404, "text/plain", "File not found"); });
+
+  // Handle direct HTML page requests
+  webServer.on("/(.*\\.html)$", HTTP_GET, []()
+               {
+    String requestPath = webServer.getServer().uri();
+    Serial.print("HTML request: ");
+    Serial.println(requestPath);
+    
+    // First try serving from /static/ folder
+    String staticPath = "/static" + requestPath;
+    if (webServer.serveFile(staticPath)) {
+      Serial.println("Served HTML from static path: " + staticPath);
+      return;
+    }
+    
+    // Then try direct path
+    if (webServer.serveFile(requestPath)) {
+      Serial.println("Served HTML directly: " + requestPath);
+      return;
+    }
+    
+    Serial.println("HTML file not found: " + requestPath);
+    webServer.getServer().send(404, "text/plain", "HTML file not found"); });
+
+  // Favicon handling
+  webServer.on("/favicon.ico", HTTP_GET, []()
+               {
+    if (webServer.serveFile("/static/favicon.ico")) {
+      Serial.println("Served favicon.ico");
+      return;
+    }
+    
+    // Return 204 No Content to prevent repeated requests
+    webServer.getServer().send(204); });
+
+  // Add a catch-all handler for other files and unmatched requests
+  webServer.getServer().onNotFound([]()
+                                   {
+    String requestPath = webServer.getServer().uri();
+    
+    // Skip API paths
+    if (requestPath.startsWith("/api/")) {
+      return;
+    }
+    
+    Serial.print("Unmatched request: ");
+    Serial.println(requestPath);
+    
+    // Try with /static/ prefix if not already there
+    if (!requestPath.startsWith("/static/")) {
+      String staticPath;
+if (requestPath.startsWith("/")) {
+  staticPath = "/static" + requestPath;
+} else {
+  staticPath = "/static/" + requestPath;
+}
+      if (webServer.serveFile(staticPath)) {
+        Serial.println("Served file from static path: " + staticPath);
+        return;
+      }
+    }
+    
+    // Try with exact path
+    if (webServer.serveFile(requestPath)) {
+      Serial.println("Served file with direct path: " + requestPath);
+      return;
+    }
+    
+    // If all fails, return 404
+    Serial.println("Resource not found: " + requestPath);
+    webServer.getServer().send(404, "text/plain", "Resource not found"); });
+}
+
+// Function to list all files in SPIFFS
+void listSPIFFSFiles()
+{
+  Serial.println("\n----- SPIFFS Files -----");
+
+  File root = SPIFFS.open("/");
+  if (!root)
+  {
+    Serial.println("Failed to open directory");
+    return;
+  }
+
+  if (!root.isDirectory())
+  {
+    Serial.println("Not a directory");
+    return;
+  }
+
+  File file = root.openNextFile();
+  int fileCount = 0;
+
+  while (file)
+  {
+    // Get file name and size
+    String fileName = file.name();
+    size_t fileSize = file.size();
+
+    Serial.print("File: ");
+    Serial.print(fileName);
+    Serial.print(" - Size: ");
+    Serial.print(fileSize);
+    Serial.println(" bytes");
+
+    file = root.openNextFile();
+    fileCount++;
+  }
+
+  Serial.print("Total files: ");
+  Serial.println(fileCount);
+  Serial.println("------------------------\n");
 }
 
 // ===== HELPER FUNCTIONS =====

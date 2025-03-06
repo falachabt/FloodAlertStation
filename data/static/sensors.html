@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flood Alert System - Sensors</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img src="/static/img/logo.svg" alt="Logo" class="logo">
+                <h2>Flood Alert</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li>
+                        <a href="/static/index.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                    </li>
+                    <li class="active"> >
+                        <a href="/static/sensors.html"><i class="fas fa-water"></i> Sensors</a>
+                    </li>
+                    <li >
+                        <a href="/static/alerts.html"><i class="fas fa-bell"></i> Alerts</a>
+                    </li>
+                    <li>
+                        <a href="/static/analytics.html"><i class="fas fa-chart-line"></i> Analytics</a>
+                    </li>
+                    <li>
+                        <a href="/static/settings.html"><i class="fas fa-cog"></i> Settings</a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="network-status">
+                    <div id="network-indicator" class="indicator online"></div>
+                    <span id="network-text">Network Online</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="content-header">
+                <div class="header-title">
+                    <h1>Sensors Management</h1>
+                    <p id="last-updated">Last updated: Just now</p>
+                </div>
+                <div class="header-actions">
+                    <button id="refresh-btn" class="btn btn-light"><i class="fas fa-sync-alt"></i> Refresh</button>
+                    <div class="system-time" id="system-time">00:00:00</div>
+                </div>
+            </header>
+
+            <!-- Sensors Map Overview -->
+            <div class="panel">
+                <div class="panel-header">
+                    <h2><i class="fas fa-map-marked-alt"></i> Sensors Overview</h2>
+                </div>
+                <div class="panel-body">
+                    <div class="map-container">
+                        <div id="sensors-map">
+                            <!-- This will be replaced with an interactive map visualization -->
+                            <div class="map-placeholder">
+                                <div class="sensor-location" style="top: 30%; left: 20%;" data-sensor="Sensor1">
+                                    <div class="location-dot normal"></div>
+                                    <div class="location-label">Sensor 1</div>
+                                </div>
+                                <div class="sensor-location" style="top: 50%; left: 40%;" data-sensor="Sensor2">
+                                    <div class="location-dot warning"></div>
+                                    <div class="location-label">Sensor 2</div>
+                                </div>
+                                <div class="sensor-location" style="top: 70%; left: 60%;" data-sensor="Sensor3">
+                                    <div class="location-dot normal"></div>
+                                    <div class="location-label">Sensor 3</div>
+                                </div>
+                                <div class="sensor-location" style="top: 40%; left: 80%;" data-sensor="Sensor4">
+                                    <div class="location-dot normal"></div>
+                                    <div class="location-label">Sensor 4</div>
+                                </div>
+                                <div class="map-caption">Interactive Sensor Map</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sensors Detailed List -->
+            <div class="panel">
+                <div class="panel-header">
+                    <h2><i class="fas fa-list"></i> Sensors List</h2>
+                    <div class="panel-actions">
+                        <div class="search-box">
+                            <input type="text" id="search-sensors" placeholder="Search sensors...">
+                            <i class="fas fa-search"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <div class="sensors-table-container">
+                        <table class="sensors-table">
+                            <thead>
+                                <tr>
+                                    <th>Status</th>
+                                    <th>Name</th>
+                                    <th>MAC Address</th>
+                                    <th>Water Level</th>
+                                    <th>Temperature</th>
+                                    <th>Last Seen</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sensors-table-body">
+                                <!-- Sensors will be loaded here dynamically -->
+                                <tr>
+                                    <td colspan="7" class="text-center">
+                                        <div class="loading-spinner">
+                                            <i class="fas fa-spinner fa-spin"></i>
+                                            <span>Loading sensors...</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sensor Details Panel (initially hidden) -->
+            <div id="sensor-details-panel" class="panel hidden">
+                <div class="panel-header">
+                    <h2><i class="fas fa-info-circle"></i> <span id="detail-sensor-name">Sensor Details</span></h2>
+                    <div class="panel-actions">
+                        <button id="close-details" class="btn-icon" title="Close Details"><i class="fas fa-times"></i></button>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <div class="sensor-details-grid">
+                        <div class="sensor-info-section">
+                            <h3>Basic Information</h3>
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <span class="info-label">Name:</span>
+                                    <span class="info-value" id="detail-name">-</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">MAC Address:</span>
+                                    <span class="info-value" id="detail-mac">-</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Status:</span>
+                                    <span class="info-value" id="detail-status">-</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Last Seen:</span>
+                                    <span class="info-value" id="detail-last-seen">-</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="sensor-data-section">
+                            <h3>Current Readings</h3>
+                            <div class="readings-container">
+                                <div class="reading-card">
+                                    <div class="reading-icon">
+                                        <i class="fas fa-water"></i>
+                                    </div>
+                                    <div class="reading-value" id="detail-water-level">-</div>
+                                    <div class="reading-label">Water Level (cm)</div>
+                                </div>
+                                <div class="reading-card">
+                                    <div class="reading-icon">
+                                        <i class="fas fa-temperature-high"></i>
+                                    </div>
+                                    <div class="reading-value" id="detail-temperature">-</div>
+                                    <div class="reading-label">Temperature (°C)</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="sensor-history-section">
+                            <h3>Historical Data</h3>
+                            <div class="chart-container">
+                                <canvas id="sensor-history-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chart.js/3.9.1/chart.min.js"></script>
+    <script src="/static/js/sensors.js"></script>
+</body>
+</html>

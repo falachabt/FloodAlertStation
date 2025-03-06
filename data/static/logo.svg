@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- Background Circle -->
+  <circle cx="100" cy="100" r="90" fill="#0a1128" />
+  <circle cx="100" cy="100" r="85" fill="#172554" />
+  
+  <!-- Water Waves -->
+  <path d="M40,100 Q55,80 70,100 Q85,120 100,100 Q115,80 130,100 Q145,120 160,100" 
+        stroke="#0466c8" stroke-width="8" fill="none" />
+  <path d="M40,125 Q55,105 70,125 Q85,145 100,125 Q115,105 130,125 Q145,145 160,125" 
+        stroke="#0582ca" stroke-width="8" fill="none" />
+  
+  <!-- Alert Triangle -->
+  <path d="M100,45 L135,105 L65,105 Z" fill="none" stroke="#fbbf24" stroke-width="4" />
+  <path d="M100,65 L100,85" stroke="#fbbf24" stroke-width="6" stroke-linecap="round" />
+  <circle cx="100" cy="95" r="3" fill="#fbbf24" />
+  
+  <!-- Sensor Dots -->
+  <circle cx="60" cy="140" r="6" fill="#ef4444" />
+  <circle cx="80" cy="150" r="6" fill="#10b981" />
+  <circle cx="120" cy="150" r="6" fill="#10b981" />
+  <circle cx="140" cy="140" r="6" fill="#fbbf24" />
+  
+  <!-- Signal Waves (from sensors) -->
+  <circle cx="60" cy="140" r="12" fill="none" stroke="#ef4444" stroke-width="2" opacity="0.6" />
+  <circle cx="60" cy="140" r="18" fill="none" stroke="#ef4444" stroke-width="2" opacity="0.4" />
+  
+  <circle cx="140" cy="140" r="12" fill="none" stroke="#fbbf24" stroke-width="2" opacity="0.6" />
+  <circle cx="140" cy="140" r="18" fill="none" stroke="#fbbf24" stroke-width="2" opacity="0.4" />
+</svg>
