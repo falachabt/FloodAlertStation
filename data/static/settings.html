@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flood Alert System - Settings</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img src="/static/img/logo.svg" alt="Logo" class="logo">
+                <h2>Flood Alert</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li>
+                        <a href="/static/index.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                    </li>
+                    <li>
+                        <a href="/static/sensors.html"><i class="fas fa-water"></i> Sensors</a>
+                    </li>
+                    <li>
+                        <a href="/static/alerts.html"><i class="fas fa-bell"></i> Alerts</a>
+                    </li>
+                    <li>
+                        <a href="/static/analytics.html"><i class="fas fa-chart-line"></i> Analytics</a>
+                    </li>
+                    <li class="active">
+                        <a href="/static/settings.html"><i class="fas fa-cog"></i> Settings</a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="network-status">
+                    <div id="network-indicator" class="indicator online"></div>
+                    <span id="network-text">Network Online</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="content-header">
+                <div class="header-title">
+                    <h1>System Settings</h1>
+                    <p id="last-updated">Last updated: Just now</p>
+                </div>
+                <div class="header-actions">
+                    <button id="refresh-btn" class="btn btn-light"><i class="fas fa-sync-alt"></i> Refresh</button>
+                    <div class="system-time" id="system-time">00:00:00</div>
+                </div>
+            </header>
+
+            <!-- WiFi Settings -->
+            <div class="panel">
+                <div class="panel-header">
+                    <h2><i class="fas fa-wifi"></i> WiFi Configuration</h2>
+                    <div class="panel-actions">
+                        <button id="scan-wifi-btn" class="btn btn-primary"><i class="fas fa-search"></i> Scan Networks</button>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <div id="wifi-status-container" class="status-section">
+                        <h3>Current Connection</h3>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <span class="info-label">Connection Status:</span>
+                                <span class="info-value" id="wifi-connection-status">Not connected</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Connected to:</span>
+                                <span class="info-value" id="wifi-ssid">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">IP Address:</span>
+                                <span class="info-value" id="wifi-ip">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Signal Strength:</span>
+                                <span class="info-value" id="wifi-signal">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="wifi-networks-container" class="mt-4">
+                        <h3>Available Networks</h3>
+                        <div id="networks-loading" class="loading-spinner">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <span>Scanning for networks...</span>
+                        </div>
+                        <div id="networks-list" class="hidden">
+                            <table class="wifi-networks-table">
+                                <thead>
+                                    <tr>
+                                        <th>Network Name</th>
+                                        <th>Signal</th>
+                                        <th>Security</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="wifi-networks-body">
+                                    <!-- Networks will be loaded here dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="no-networks-message" class="no-data-message hidden">
+                            <i class="fas fa-wifi"></i>
+                            <p>No WiFi networks found. Please try scanning again.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Settings -->
+            <div class="panel">
+                <div class="panel-header">
+                    <h2><i class="fas fa-sliders-h"></i> System Configuration</h2>
+                </div>
+                <div class="panel-body">
+                    <div class="settings-grid">
+                        <div class="settings-section">
+                            <h3>Device Settings</h3>
+                            <div class="settings-form">
+                                <div class="form-group">
+                                    <label for="device-name">Device Name:</label>
+                                    <input type="text" id="device-name" class="form-control" value="AlertStation">
+                                </div>
+                                <div class="form-group">
+                                    <label for="ap-ssid">Access Point SSID:</label>
+                                    <input type="text" id="ap-ssid" class="form-control" value="FloodAlertSystem">
+                                </div>
+                                <div class="form-group">
+                                    <label for="ap-password">Access Point Password:</label>
+                                    <input type="password" id="ap-password" class="form-control" value="********">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="settings-section">
+                            <h3>Network Settings</h3>
+                            <div class="settings-form">
+                                <div class="form-group">
+                                    <label for="min-peers">Minimum Required Peers:</label>
+                                    <input type="number" id="min-peers" class="form-control" value="1" min="1" max="20">
+                                </div>
+                                <div class="form-group">
+                                    <label for="wifi-channel">WiFi Channel:</label>
+                                    <select id="wifi-channel" class="form-control">
+                                        <option value="1">Channel 1</option>
+                                        <option value="2">Channel 2</option>
+                                        <option value="3">Channel 3</option>
+                                        <option value="4">Channel 4</option>
+                                        <option value="5">Channel 5</option>
+                                        <option value="6" selected>Channel 6</option>
+                                        <option value="7">Channel 7</option>
+                                        <option value="8">Channel 8</option>
+                                        <option value="9">Channel 9</option>
+                                        <option value="10">Channel 10</option>
+                                        <option value="11">Channel 11</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="settings-actions">
+                        <button id="save-system-settings" class="btn btn-primary"><i class="fas fa-save"></i> Save Settings</button>
+                        <button id="reset-system-settings" class="btn btn-light"><i class="fas fa-undo"></i> Reset to Default</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- WiFi Connect Modal -->
+    <div id="wifi-connect-modal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2 id="connect-modal-title">Connect to WiFi</h2>
+                <button id="connect-modal-close" class="btn-icon" title="Close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="connect-ssid">Network Name:</label>
+                    <input type="text" id="connect-ssid" class="form-control" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="connect-password">Password:</label>
+                    <input type="password" id="connect-password" class="form-control" placeholder="Enter WiFi password">
+                </div>
+                <div id="connect-status" class="hidden">
+                    <div class="loading-spinner">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <span id="connect-status-message">Connecting...</span>
+                    </div>
+                </div>
+                <div class="settings-actions">
+                    <button id="wifi-connect-btn" class="btn btn-primary"><i class="fas fa-plug"></i> Connect</button>
+                    <button id="connect-cancel-btn" class="btn btn-light"><i class="fas fa-times"></i> Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Connection Success Modal -->
+    <div id="connection-success-modal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2>Connection Successful</h2>
+                <button id="success-modal-close" class="btn-icon" title="Close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="success-message" style="text-align: center; margin: 20px 0;">
+                    <i class="fas fa-check-circle" style="color: var(--success); font-size: 48px; margin-bottom: 20px;"></i>
+                    <h3>Successfully connected to the network!</h3>
+                    <p id="success-details">Your device is now connected to <strong id="success-ssid"></strong>.</p>
+                    <p id="success-ip">IP Address: <strong id="success-ip-address"></strong></p>
+                </div>
+                <div class="settings-actions">
+                    <button id="success-ok-btn" class="btn btn-primary"><i class="fas fa-check"></i> OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Connection Failed Modal -->
+    <div id="connection-failed-modal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2>Connection Failed</h2>
+                <button id="failed-modal-close" class="btn-icon" title="Close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="failed-message" style="text-align: center; margin: 20px 0;">
+                    <i class="fas fa-exclamation-circle" style="color: var(--danger); font-size: 48px; margin-bottom: 20px;"></i>
+                    <h3>Failed to connect to the network!</h3>
+                    <p id="failure-reason">Unable to connect to <strong id="failed-ssid"></strong>. Please check the password and try again.</p>
+                </div>
+                <div class="settings-actions">
+                    <button id="retry-btn" class="btn btn-primary"><i class="fas fa-redo"></i> Try Again</button>
+                    <button id="failed-cancel-btn" class="btn btn-light"><i class="fas fa-times"></i> Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/static/js/settings.js"></script>
+</body>
+</html>

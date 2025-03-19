@@ -1,0 +1,18 @@
+{
+	"folders": [
+		{
+			"path": "../../../../Arduino/altert_station"
+		},
+		{
+			"name": "FloodAlertStation",
+			"path": ".."
+		}
+	],
+	"settings": {
+		"workbench.colorCustomizations": {
+			"activityBar.background": "#411C58",
+			"titleBar.activeBackground": "#5B277B",
+			"titleBar.activeForeground": "#FDFCFE"
+		}
+	}
+}
