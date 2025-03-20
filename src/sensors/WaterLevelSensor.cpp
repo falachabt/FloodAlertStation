@@ -24,6 +24,8 @@ void WaterLevelSensor::update() {
     // Convertir en niveau d'eau (en cm)
     // Supposons une relation linéaire entre la lecture ADC et le niveau d'eau
     _waterLevel = (float)_rawValue / MAX_RAW_VALUE * MAX_WATER_LEVEL;
+
+    
     
     // Mettre à jour la catégorie
     _calculateCategory();

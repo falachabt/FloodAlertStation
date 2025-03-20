@@ -96,6 +96,8 @@ void FloodAlertSystem::update() {
         if (!_isMaster) {
             // Si esclave, envoyer les données au master
             sendSensorData();
+
+            
         }
         
         // Imprimer l'état du réseau
@@ -213,6 +215,15 @@ void FloodAlertSystem::sendSensorData() {
     for (auto sensor : _sensors) {
         if (strcmp(sensor->getName(), "WaterLevel") == 0) {
             sensor->getData(data, count);
+
+             // Print sensor data to Serial Monitor
+             Serial.println("\n--- SLAVE SENSOR DATA ---");
+             Serial.print("Water Level: ");
+             Serial.print(data[0]);
+             Serial.println(" cm");
+             Serial.print("Category: ");
+             Serial.println((int)data[2]); // 0=normal, 1=warning, 2=critical
+             Serial.println("------------------------\n");
             break; // On ne prend que le premier capteur de niveau d'eau
         }
     }
@@ -289,6 +300,37 @@ void FloodAlertSystem::handleSensorData(const float* data, uint8_t count, const 
     Serial.print(_remoteSensors[idx].temperature);
     Serial.print("°C, Category=");
     Serial.println(_remoteSensors[idx].category);
+
+    if (count >= 2) {
+        Serial.print("Temperature: ");
+        Serial.print(_remoteSensors[idx].temperature);
+        Serial.println("°C");
+    }
+    
+    Serial.print("Category: ");
+    Serial.print(_remoteSensors[idx].category);
+    Serial.print(" (");
+    switch(_remoteSensors[idx].category) {
+        case 0: Serial.print("Normal"); break;
+        case 1: Serial.print("Warning"); break;
+        case 2: Serial.print("Alert"); break;
+        default: Serial.print("Unknown");
+    }
+    Serial.println(")");
+    
+    // Print formatted MAC address
+    Serial.print("MAC Address: ");
+    for (int i = 0; i < 6; i++) {
+        Serial.print(_remoteSensors[idx].mac[i], HEX);
+        if (i < 5) Serial.print(":");
+    }
+    Serial.println();
+    
+    Serial.println("-----------------------------------\n");
+
+
+
+
 }
 
 // Configuration du serveur web
