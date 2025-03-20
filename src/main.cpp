@@ -4,9 +4,20 @@
 // Inclure les capteurs que vous souhaitez utiliser
 #include "sensors/DHT11Sensor.h"
 #include "sensors/WaterLevelSensor.h"
+#include "indicators/LEDAlertIndicator.h"
+
+#include <Ticker.h>
+Ticker alertTestTicker;
+bool testingAlert = false;
+int testPhase = 0;
+
 
 // Créer l'instance du système (ne pas utiliser "system" comme nom de variable)
 FloodAlertSystem floodSystem;
+
+LEDAlertIndicator ledIndicator(LED_RED_PIN, LED_YELLOW_PIN, LED_GREEN_PIN);
+
+
 
 void setup() {
     Serial.begin(115200);
@@ -17,6 +28,7 @@ void setup() {
     // Initialiser le système dans le mode approprié défini dans Config.h
     bool isMaster = MODE_MASTER;
     
+    ledIndicator.begin();
     floodSystem.begin(isMaster);
     
     if (isMaster) {
@@ -24,6 +36,7 @@ void setup() {
         
         // En mode MASTER, ajouter le capteur DHT11
         floodSystem.addSensor(new DHT11Sensor(DHT11_PIN));
+        floodSystem.setLEDIndicator(&ledIndicator);
         Serial.println("DHT11 sensor added to master");
     } else {
         Serial.println("System initialized in SLAVE mode");
@@ -33,6 +46,8 @@ void setup() {
         Serial.println("Water level sensor added to slave");
     }
     
+    // Initial LED status
+    ledIndicator.setGreen(true);
     Serial.println("Setup complete!");
 }
 

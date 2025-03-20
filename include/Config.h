@@ -25,6 +25,14 @@
 #define DHT11_PIN 2                // GPIO pour le capteur DHT11
 #define TEMP_WARNING_THRESHOLD 35    // Seuil d'avertissement de température
 
+// Configuration des LEDs pour les alertes visuelles
+#define LED_RED_PIN 22              // GPIO pour la LED rouge
+#define LED_YELLOW_PIN 4           // GPIO pour la LED jaune
+#define LED_GREEN_PIN 23            // GPIO pour la LED verte
+
+// Configuration de l'alerte visuelle
+#define WATER_ALERT_DELAY_MS 60000  // Délai en milliseconds (1 minute) avant activation de l'alerte
+
 // Nombre maximum de capteurs distants
 #define MAX_SENSORS 10
 

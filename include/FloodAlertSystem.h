@@ -5,6 +5,7 @@
 #include "network/FloodAlertNetwork.h"
 #include "FloodAlertWebServer.h"
 #include "sensors/SensorBase.h"
+#include "indicators/LEDAlertIndicator.h"
 #include <vector>
 
 // Structure pour stocker les données des capteurs
@@ -31,26 +32,29 @@ public:
     void addSensor(SensorBase* sensor);
     void removeSensor(SensorBase* sensor);
     
+    // Gestion des indicateurs
+    void setLEDIndicator(LEDAlertIndicator* ledIndicator);
+    
     // Traitement des données
     void processReceivedMessage(const network_message_t& msg, const uint8_t* mac);
     void processReceivedData(float* data, uint8_t count);
-    
     
     // Accès aux composants principaux
     FloodAlertNetwork& getNetwork() { return _network; }
     FloodAlertWebServer& getWebServer() { return _webServer; }
     
 private:
-bool _isMaster;
-bool _isRunning = false;
-FloodAlertNetwork _network;
-FloodAlertWebServer _webServer;
-std::vector<SensorBase*> _sensors;
-unsigned long _lastStatusUpdate = 0;
+    bool _isMaster;
+    bool _isRunning = false;
+    FloodAlertNetwork _network;
+    FloodAlertWebServer _webServer;
+    std::vector<SensorBase*> _sensors;
+    LEDAlertIndicator* _ledIndicator = nullptr;
+    unsigned long _lastStatusUpdate = 0;
 
-// Liste des capteurs distants
-SensorData _remoteSensors[MAX_SENSORS];
-uint8_t _remoteSensorCount = 0;
+    // Liste des capteurs distants
+    SensorData _remoteSensors[MAX_SENSORS];
+    uint8_t _remoteSensorCount = 0;
 
     // Gestion du réseau et des capteurs
     void setupWebServer();
@@ -58,6 +62,7 @@ uint8_t _remoteSensorCount = 0;
     void updateInactiveSensors();
     void sendSensorData();
     void handleSensorData(const float* data, uint8_t count, const uint8_t* mac, const char* sensorName);
+    void updateLEDIndicator(float waterLevel, uint8_t category);
     
     // Instance singleton pour les callbacks
     static FloodAlertSystem* _instance;
