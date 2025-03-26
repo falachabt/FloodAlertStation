@@ -1,4 +1,5 @@
 #include "network/FloodAlertNetwork.h"
+#include "utils/logger.h"
 
 // Initialize static instance pointer
 FloodAlertNetwork* FloodAlertNetwork::_instance = nullptr;
@@ -54,7 +55,7 @@ bool FloodAlertNetwork::begin(bool is_master, uint8_t min_peers, uint8_t channel
     
     // Initialize ESP-NOW
     if (esp_now_init() != ESP_OK) {
-        Serial.println("Error initializing ESP-NOW");
+        Logger::error("Error initializing ESP-NOW");
         return false;
     }
     
@@ -64,15 +65,15 @@ bool FloodAlertNetwork::begin(bool is_master, uint8_t min_peers, uint8_t channel
     
     _initialized = true;
     
-    Serial.println("FloodAlertNetwork initialized");
-    Serial.print("Device role: ");
-    Serial.println(_is_master ? "MASTER" : "SLAVE");
-    Serial.print("MAC Address: ");
-    for (int i = 0; i < 6; i++) {
-        Serial.print(_own_mac[i], HEX);
-        if (i < 5) Serial.print(":");
-    }
-    Serial.println();
+    // Serial.println("FloodAlertNetwork initialized");
+    // Serial.print("Device role: ");
+    // Serial.println(_is_master ? "MASTER" : "SLAVE");
+    // Serial.print("MAC Address: ");
+    // for (int i = 0; i < 6; i++) {
+    //     Serial.print(_own_mac[i], HEX);
+    //     if (i < 5) Serial.print(":");
+    // }
+    // Serial.println();
     
     // If slave, start discovery to find master
     if (!_is_master) {
@@ -100,7 +101,7 @@ void FloodAlertNetwork::onDataReady(DataReadyCallback callback) {
 // Send sensor data to the master device (for slave devices)
 bool FloodAlertNetwork::sendToMaster(const float* data, uint8_t data_count, const char* text) {
     if (!_master_found) {
-        Serial.println("Master not found. Cannot send data.");
+        // Serial.println("Master not found. Cannot send data.");
         return false;
     }
     
@@ -164,13 +165,13 @@ bool FloodAlertNetwork::sendToAllSlaves(const float* data, uint8_t data_count, u
 // Send a message to a specific slave
 bool FloodAlertNetwork::sendToSlave(const uint8_t* mac_addr, const float* data, uint8_t data_count, const char* text) {
     if (!_is_master) {
-        Serial.println("Only master can send to specific slaves.");
+        // Serial.println("Only master can send to specific slaves.");
         return false;
     }
     
     int peer_idx = _findPeerIndex(mac_addr);
     if (peer_idx < 0) {
-        Serial.println("Slave not found in peer list.");
+        // Serial.println("Slave not found in peer list.");
         return false;
     }
     
@@ -303,55 +304,51 @@ void FloodAlertNetwork::update() {
     // Track network readiness
     if (isNetworkReady() && _network_ready_time == 0) {
         _network_ready_time = now;
-        Serial.println("Network is ready!");
+        // Serial.println("Network is ready!");
     } else if (!isNetworkReady() && _network_ready_time != 0) {
         _network_ready_time = 0;
-        Serial.println("Network is no longer ready.");
+        // Serial.println("Network is no longer ready.");
     }
 }
 
 // Print network status for debugging
 void FloodAlertNetwork::printNetworkStatus() {
-    Serial.println("\n--- Network Status ---");
-    Serial.print("Role: ");
-    Serial.println(_is_master ? "MASTER" : "SLAVE");
-    Serial.print("Connected peers: ");
-    Serial.print(_peer_count);
-    Serial.print(" (minimum: ");
-    Serial.print(_min_peers);
-    Serial.println(")");
-    Serial.print("Network ready: ");
-    Serial.println(isNetworkReady() ? "YES" : "NO");
+    Logger::info("\n--- État du Réseau ---");
+    Logger::infoF("Rôle: %s", _is_master ? "MASTER" : "SLAVE");
+    Logger::infoF("Pairs connectés: %d (minimum: %d)", _peer_count, _min_peers);
+    Logger::infoF("Réseau prêt: %s", isNetworkReady() ? "OUI" : "NON");
     
     if (!_is_master) {
-        Serial.print("Connected to master: ");
-        Serial.println(_master_found ? "YES" : "NO");
+        Logger::infoF("Connecté au master: %s", _master_found ? "OUI" : "NON");
     }
     
-    Serial.println("--- End Status ---\n");
+    Logger::info("--- Fin État ---\n");
 }
 
 // Print list of connected peers
 void FloodAlertNetwork::printPeers() {
-    Serial.println("\n--- Connected Peers ---");
+    Logger::ui("\n--- Pairs Connectés ---");
+    int pairsCount = 0;
+    
     for (int i = 0; i < MAX_PEERS; i++) {
         if (_peers[i].in_use) {
+            pairsCount++;
             const uint8_t* mac = _peers[i].peer_info.peer_addr;
-            Serial.print("Peer MAC: ");
-            for (int j = 0; j < 6; j++) {
-                Serial.print(mac[j], HEX);
-                if (j < 5) Serial.print(":");
-            }
-            Serial.print(" Role: ");
-            Serial.print(_peers[i].is_master ? "MASTER" : "SLAVE");
-            Serial.print(" Ready: ");
-            Serial.print(_peers[i].is_ready ? "YES" : "NO");
-            Serial.print(" Last seen: ");
-            Serial.print((millis() - _peers[i].last_seen) / 1000);
-            Serial.println(" seconds ago");
+            Logger::ui("Pair MAC: ");
+            Serial.printf("%02X:%02X:%02X:%02X:%02X:%02X", 
+                        mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+            Logger::uiF(" Rôle: %s", _peers[i].is_master ? "MASTER" : "SLAVE");
+            Logger::uiF(" Prêt: %s", _peers[i].is_ready ? "OUI" : "NON");
+            Logger::uiF(" Dernière connexion: %d secondes",
+                      (millis() - _peers[i].last_seen) / 1000);
         }
     }
-    Serial.println("--- End Peers ---\n");
+    
+    if (pairsCount == 0) {
+        Logger::ui("Aucun pair connecté");
+    }
+    
+    Logger::ui("--- Fin Pairs ---\n");
 }
 
 // Set device name for identification
@@ -380,7 +377,7 @@ void FloodAlertNetwork::_processPeerDiscovery(const network_message_t& msg, cons
         _addPeer(mac_addr, true);
         memcpy(_master_mac, mac_addr, 6);
         _master_found = true;
-        Serial.println("Master found!");
+        // Serial.println("Master found!");
     }
     // If we're the master, add all slaves
     else if (_is_master && !msg.is_master) {
@@ -401,7 +398,7 @@ bool FloodAlertNetwork::_addPeer(const uint8_t* mac_addr, bool is_master) {
     // Find a free slot
     int slot = _findFreePeerSlot();
     if (slot < 0) {
-        Serial.println("Peer list is full, cannot add new peer.");
+        Logger::info("No free slot for new peer.");
         return false;
     }
     
@@ -417,21 +414,20 @@ bool FloodAlertNetwork::_addPeer(const uint8_t* mac_addr, bool is_master) {
     // Add peer to ESP-NOW
     esp_err_t result = esp_now_add_peer(&_peers[slot].peer_info);
     if (result != ESP_OK) {
-        Serial.print("Failed to add peer: ");
-        Serial.println(result);
+        // Serial.print("Failed to add peer: ");
+        // Serial.println(result);
         _peers[slot].in_use = false;
         return false;
     }
     
     _peer_count++;
     
-    Serial.print("Added new peer: ");
+    Logger::info("Nouveau pair ajouté: ");
     for (int i = 0; i < 6; i++) {
-        Serial.print(mac_addr[i], HEX);
+        Serial.printf("%02X", mac_addr[i]);
         if (i < 5) Serial.print(":");
     }
-    Serial.print(" Role: ");
-    Serial.println(is_master ? "MASTER" : "SLAVE");
+    Logger::infoF(" Rôle: %s", is_master ? "MASTER" : "SLAVE");
     
     return true;
 }

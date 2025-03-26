@@ -1,5 +1,6 @@
 #include "indicators/BuzzerAlertIndicator.h"
 #include "Config.h"
+#include "utils/logger.h"
 
 BuzzerAlertIndicator::BuzzerAlertIndicator(uint8_t buzzerPin)
     : _buzzerPin(buzzerPin),
@@ -23,7 +24,7 @@ bool BuzzerAlertIndicator::begin() {
     // Play a startup sound to indicate the buzzer is working
     playSuccessTone();
     
-    Serial.println("Buzzer Alert Indicator initialized");
+    Logger::info("Buzzer Alert Indicator initialized");
     return true;
 }
 
@@ -31,26 +32,26 @@ void BuzzerAlertIndicator::update(float waterLevel, uint8_t category) {
     unsigned long currentTime = millis();
     
     // Print debug info to help troubleshoot
-    Serial.print("Buzzer Indicator update - Water level: ");
-    Serial.print(waterLevel);
-    Serial.print("cm, Category: ");
-    Serial.print(category);
-    Serial.print(", Alert state: ");
-    Serial.println(_alertState ? "ON" : "OFF");
+    // Serial.print("Buzzer Indicator update - Water level: ");
+    // Serial.print(waterLevel);
+    // Serial.print("cm, Category: ");
+    // Serial.print(category);
+    // Serial.print(", Alert state: ");
+    // Serial.println(_alertState ? "ON" : "OFF");
     
     // Store the current time when we first detect a category change
     if (category != _lastCategory) {
-        Serial.print("Category changed from ");
-        Serial.print(_lastCategory);
-        Serial.print(" to ");
-        Serial.println(category);
+        // Serial.print("Category changed from ");
+        // Serial.print(_lastCategory);
+        // Serial.print(" to ");
+        // Serial.println(category);
         
         _lastWaterLevelUpdate = currentTime;
         
         // If transitioning to an alert state, reset silence status
         if (category >= 1 && _lastCategory < 1) {
             _silenced = false;
-            Serial.println("Starting alert timer - silence reset");
+            // Serial.println("Starting alert timer - silence reset");
         }
         
         _lastCategory = category;
@@ -62,20 +63,20 @@ void BuzzerAlertIndicator::update(float waterLevel, uint8_t category) {
     // Immediate alert for critical water levels (category 2)
     if (category == 2) {
         shouldAlert = true;
-        Serial.println("CRITICAL WATER LEVEL - Immediate alert");
+        // Serial.println("CRITICAL WATER LEVEL - Immediate alert");
     }
     // Delayed alert for warning levels (category 1)
     else if (category == 1) {
         // Check if warning has persisted long enough
         if (currentTime - _lastWaterLevelUpdate >= ALERT_DELAY_MS) {
             shouldAlert = true;
-            Serial.println("WARNING PERSISTED - Activating alert");
+            // Serial.println("WARNING PERSISTED - Activating alert");
         } else {
-            Serial.print("Warning condition: ");
-            Serial.print((currentTime - _lastWaterLevelUpdate) / 1000);
-            Serial.print(" seconds of ");
-            Serial.print(ALERT_DELAY_MS / 1000);
-            Serial.println(" required before alert");
+            // Serial.print("Warning condition: ");
+            // Serial.print((currentTime - _lastWaterLevelUpdate) / 1000);
+            // Serial.print(" seconds of ");
+            // Serial.print(ALERT_DELAY_MS / 1000);
+            // Serial.println(" required before alert");
         }
     }
     // Normal water level (category 0)
@@ -84,7 +85,7 @@ void BuzzerAlertIndicator::update(float waterLevel, uint8_t category) {
         
         // If transitioning from alert to normal
         if (_alertState) {
-            Serial.println("WATER LEVEL NORMAL - Clearing alert");
+            // Serial.println("WATER LEVEL NORMAL - Clearing alert");
             _silenced = false; // Reset silenced state when alert clears
         }
     }
@@ -102,8 +103,8 @@ void BuzzerAlertIndicator::showAlert(bool isAlert, uint8_t alertType) {
     _alertState = isAlert;
     _currentAlertType = alertType;
     
-    Serial.print("Buzzer Alert state changed to: ");
-    Serial.println(isAlert ? "ACTIVE" : "INACTIVE");
+    // Serial.print("Buzzer Alert state changed to: ");
+    // Serial.println(isAlert ? "ACTIVE" : "INACTIVE");
     
     if (isAlert && !_silenced) {
         // Play initial alert tone
@@ -118,7 +119,7 @@ void BuzzerAlertIndicator::silenceAlert() {
     if (_alertState) {
         _silenced = true;
         setBuzzer(false);
-        Serial.println("Buzzer alert silenced by user");
+        // Serial.println("Buzzer alert silenced by user");
     }
 }
 
@@ -205,8 +206,8 @@ void BuzzerAlertIndicator::setBuzzer(bool state) {
     }
     
     _toneState = state;
-    Serial.print("Buzzer: ");
-    Serial.println(state ? "ON" : "OFF");
+    // Serial.print("Buzzer: ");
+    // Serial.println(state ? "ON" : "OFF");
 }
 
 void BuzzerAlertIndicator::tick() {

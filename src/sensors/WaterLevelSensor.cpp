@@ -1,5 +1,7 @@
 #include "sensors/WaterLevelSensor.h"
 #include <Arduino.h>
+#include "utils/Logger.h"
+
 
 WaterLevelSensor::WaterLevelSensor(uint8_t pin) : _pin(pin) {
 }
@@ -12,8 +14,7 @@ bool WaterLevelSensor::begin() {
     // Configurer le pin comme entrée
     pinMode(_pin, INPUT);
     _isActive = true;
-    Serial.print("Water level sensor initialized on pin ");
-    Serial.println(_pin);
+    Logger::infoF("Capteur de niveau d'eau initialisé sur le pin %d", _pin);
     return true;
 }
 

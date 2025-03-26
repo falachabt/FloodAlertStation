@@ -1,5 +1,6 @@
 #include "sensors/DHT11Sensor.h"
 #include <DHT.h>
+#include "utils/Logger.h"
 
 DHT11Sensor::DHT11Sensor(uint8_t pin) : _pin(pin) {
     _dht = new DHT(pin, DHT11);
@@ -14,8 +15,7 @@ DHT11Sensor::~DHT11Sensor() {
 bool DHT11Sensor::begin() {
     _dht->begin();
     _isActive = true;
-    Serial.print("DHT11 sensor initialized on pin ");
-    Serial.println(_pin);
+    Logger::infoF("Capteur DHT11 initialisé sur le pin %d", _pin);
     return true;
 }
 
@@ -25,12 +25,14 @@ void DHT11Sensor::update() {
     
     // Vérifier si la lecture a échoué
     if (isnan(_temperature) || isnan(_humidity)) {
-        Serial.println("Failed to read from DHT sensor!");
+        Logger::error("Échec de lecture du capteur DHT!");
         return;
     }
     
     _lastReadTime = millis();
     _calculateCategory();
+
+    Logger::debugF("DHT11: Température=%.1f°C, Humidité=%.1f%%", _temperature, _humidity);
 }
 
 const char* DHT11Sensor::getName() {

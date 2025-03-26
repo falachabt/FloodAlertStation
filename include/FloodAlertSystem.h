@@ -37,6 +37,10 @@ public:
     void setLEDIndicator(LEDAlertIndicator* ledIndicator);
     void setBuzzerIndicator(BuzzerAlertIndicator* buzzerIndicator);
     
+    // Accès aux indicateurs (ajout pour le système de menu)
+    BuzzerAlertIndicator* getBuzzerIndicator() { return _buzzerIndicator; }
+    LEDAlertIndicator* getLEDIndicator() { return _ledIndicator; }
+    
     // Silencer l'alerte sonore
     void silenceAudioAlert();
     

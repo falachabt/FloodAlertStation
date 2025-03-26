@@ -1,5 +1,6 @@
 #include "indicators/LEDAlertIndicator.h"
 #include "Config.h"
+#include "utils/logger.h"
 
 LEDAlertIndicator::LEDAlertIndicator(uint8_t redPin, uint8_t yellowPin, uint8_t greenPin)
     : _redPin(redPin), _yellowPin(yellowPin), _greenPin(greenPin),
@@ -20,7 +21,7 @@ bool LEDAlertIndicator::begin() {
     blinkLED(_yellowPin, 1);
     blinkLED(_redPin, 1);
     
-    Serial.println("LED Alert Indicator initialized");
+    Logger::info("LED Alert Indicator initialized");
     return true;
 }
 
@@ -28,29 +29,29 @@ void LEDAlertIndicator::update(float waterLevel, uint8_t category) {
     unsigned long currentTime = millis();
     
     // Print debug info to help troubleshoot
-    Serial.print("LED Indicator update - Water level: ");
-    Serial.print(waterLevel);
-    Serial.print("cm, Category: ");
-    Serial.print(category);
-    Serial.print(", Alert state: ");
-    Serial.println(_alertState ? "ON" : "OFF");
+    // Serial.print("LED Indicator update - Water level: ");
+    // Serial.print(waterLevel);
+    // Serial.print("cm, Category: ");
+    // Serial.print(category);
+    // Serial.print(", Alert state: ");
+    // Serial.println(_alertState ? "ON" : "OFF");
     
     // Check if category has changed
     if (category != _lastCategory) {
-        Serial.print("Category changed from ");
-        Serial.print(_lastCategory);
-        Serial.print(" to ");
-        Serial.println(category);
+        // Serial.print("Category changed from ");
+        // Serial.print(_lastCategory);
+        // Serial.print(" to ");
+        // Serial.println(category);
         
         // If we're transitioning to a high water level (cat 1 or 2)
         if (category >= 1 && _lastCategory < 1) {
             _lastWaterLevelUpdate = currentTime;
-            Serial.println("Starting high water timer");
+            // Serial.println("Starting high water timer");
         }
         // If we're transitioning to normal water level
         else if (category == 0 && _lastCategory >= 1) {
             _lastWaterLevelUpdate = currentTime;
-            Serial.println("Starting normal water timer");
+            // Serial.println("Starting normal water timer");
         }
         
         _lastCategory = category;
@@ -64,7 +65,7 @@ void LEDAlertIndicator::update(float waterLevel, uint8_t category) {
         // If this is persistent high water
         if (currentTime - _lastWaterLevelUpdate >= ALERT_DELAY_MS) {
             if (!_alertState) {
-                Serial.println("ACTIVATING ALERT: High water persistent for > 1 minute");
+                // Serial.println("ACTIVATING ALERT: High water persistent for > 1 minute");
             }
             shouldAlert = true;
         }
@@ -73,14 +74,14 @@ void LEDAlertIndicator::update(float waterLevel, uint8_t category) {
     else {
         // If water has been normal for the required time
         if (_alertState && (currentTime - _lastWaterLevelUpdate >= ALERT_DELAY_MS)) {
-            Serial.println("CLEARING ALERT: Normal water persistent for > 1 minute");
+            // Serial.println("CLEARING ALERT: Normal water persistent for > 1 minute");
             shouldAlert = false;
         }
     }
     
     // If alert state should change, update the LEDs
     if (shouldAlert != _alertState) {
-        showAlert(shouldAlert);
+        // showAlert(shouldAlert);
     }
     
     // Update status LEDs based on current category
@@ -111,8 +112,8 @@ void LEDAlertIndicator::update(float waterLevel, uint8_t category) {
 void LEDAlertIndicator::showAlert(bool isAlert) {
     _alertState = isAlert;
     
-    Serial.print("Alert state changed to: ");
-    Serial.println(isAlert ? "ACTIVE" : "INACTIVE");
+    // Serial.print("Alert state changed to: ");
+    // Serial.println(isAlert ? "ACTIVE" : "INACTIVE");
     
     if (isAlert) {
         // Turn on red LED for alert
@@ -140,20 +141,20 @@ void LEDAlertIndicator::blinkLED(uint8_t pin, int times, int delayMs) {
 
 void LEDAlertIndicator::setRed(bool state) {
     digitalWrite(_redPin, state ? HIGH : LOW);
-    Serial.print("Red LED: ");
-    Serial.println(state ? "ON" : "OFF");
+    // Serial.print("Red LED: ");
+    // Serial.println(state ? "ON" : "OFF");
 }
 
 void LEDAlertIndicator::setYellow(bool state) {
     digitalWrite(_yellowPin, state ? HIGH : LOW);
-    Serial.print("Yellow LED: ");
-    Serial.println(state ? "ON" : "OFF");
+    // Serial.print("Yellow LED: ");
+    // Serial.println(state ? "ON" : "OFF");
 }
 
 void LEDAlertIndicator::setGreen(bool state) {
     digitalWrite(_greenPin, state ? HIGH : LOW);
-    Serial.print("Green LED: ");
-    Serial.println(state ? "ON" : "OFF");
+    // Serial.print("Green LED: ");
+    // Serial.println(state ? "ON" : "OFF");
 }
 
 void LEDAlertIndicator::allOff() {
