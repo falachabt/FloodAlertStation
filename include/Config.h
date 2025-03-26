@@ -2,7 +2,7 @@
 #define CONFIG_H
 
 // Mode de fonctionnement - changer cette valeur pour compiler soit le master, soit le slave
-#define MODE_MASTER true  // true pour master, false pour slave
+#define MODE_MASTER false  // true pour master, false pour slave
 
 // Configuration réseau
 #define DEVICE_NAME "AlertStation"  // Nom pour le master
@@ -15,8 +15,8 @@
 #define AP_PASSWORD "floodalert123"  // Mot de passe du point d'accès
 
 // Seuils d'alerte pour le niveau d'eau
-#define WATER_WARNING_THRESHOLD 50   // Seuil d'avertissement (en cm)
-#define WATER_CRITICAL_THRESHOLD 75  // Seuil critique (en cm)
+#define WATER_WARNING_THRESHOLD 10   // Seuil d'avertissement (en cm)
+#define WATER_CRITICAL_THRESHOLD 20  // Seuil critique (en cm)
 
 // Configuration du capteur de niveau d'eau (pour slave)
 #define WATER_LEVEL_SENSOR_PIN 34    // GPIO pour le capteur de niveau d'eau
@@ -29,6 +29,9 @@
 #define LED_RED_PIN 22              // GPIO pour la LED rouge
 #define LED_YELLOW_PIN 4           // GPIO pour la LED jaune
 #define LED_GREEN_PIN 23            // GPIO pour la LED verte
+
+// Configuration du buzzer pour les alertes sonores
+#define BUZZER_PIN 15              // GPIO pour le buzzer
 
 // Configuration de l'alerte visuelle
 #define WATER_ALERT_DELAY_MS 60000  // Délai en milliseconds (1 minute) avant activation de l'alerte

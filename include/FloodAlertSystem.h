@@ -6,6 +6,7 @@
 #include "FloodAlertWebServer.h"
 #include "sensors/SensorBase.h"
 #include "indicators/LEDAlertIndicator.h"
+#include "indicators/BuzzerAlertIndicator.h"
 #include <vector>
 
 // Structure pour stocker les données des capteurs
@@ -34,6 +35,10 @@ public:
     
     // Gestion des indicateurs
     void setLEDIndicator(LEDAlertIndicator* ledIndicator);
+    void setBuzzerIndicator(BuzzerAlertIndicator* buzzerIndicator);
+    
+    // Silencer l'alerte sonore
+    void silenceAudioAlert();
     
     // Traitement des données
     void processReceivedMessage(const network_message_t& msg, const uint8_t* mac);
@@ -50,6 +55,7 @@ private:
     FloodAlertWebServer _webServer;
     std::vector<SensorBase*> _sensors;
     LEDAlertIndicator* _ledIndicator = nullptr;
+    BuzzerAlertIndicator* _buzzerIndicator = nullptr;
     unsigned long _lastStatusUpdate = 0;
 
     // Liste des capteurs distants
@@ -62,7 +68,10 @@ private:
     void updateInactiveSensors();
     void sendSensorData();
     void handleSensorData(const float* data, uint8_t count, const uint8_t* mac, const char* sensorName);
-    void updateLEDIndicator(float waterLevel, uint8_t category);
+    void updateIndicators(float waterLevel, uint8_t category);
+    
+    // Traitement des commandes série
+    void processSerialCommands();
     
     // Instance singleton pour les callbacks
     static FloodAlertSystem* _instance;
