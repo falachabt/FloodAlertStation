@@ -67,7 +67,7 @@ Un système d'alerte d'inondation intelligent basé sur ESP32, conçu pour surve
 
 1. **Clonez le dépôt :**
    ```bash
-   git clone https://github.com/votre-username/FloodAlertStation.git
+   git clone https://github.com/falachabt/FloodAlertStation.git
    cd FloodAlertStation
    ```
 
@@ -138,28 +138,6 @@ FloodAlertStation/
 
 ---
 
-Data Flow
-The system operates on a hub-and-spoke model where slave nodes collect sensor data and transmit to the master node using ESP-NOW protocol. The master node aggregates data and provides web interface access.
-
-[Slave Node 1]     [Slave Node 2]     [Slave Node 3]
-     │                  │                  │
-     └──────────────────┼──────────────────┘
-                        │
-                        ▼
-                  [Master Node]
-                        │
-                        ▼
-                [Web Interface]
-
-Key interactions:
-
-Slave nodes read water level and temperature data every 5 seconds
-Data is transmitted to master node using ESP-NOW protocol
-Master node processes incoming data and updates alert status
-Web interface polls master node every 30 seconds for updates
-Alert indicators are triggered based on configurable thresholds
-Network status is monitored and displayed on dashboard
-
 ## 📦 Dépendances
 
 - [ArduinoJson](https://arduinojson.org/) - Gestion des données JSON.
@@ -197,7 +175,7 @@ Ce projet est sous licence MIT. Consultez le fichier `LICENSE` pour plus de dét
 
 ## 📧 Contact
 
-Pour toute question ou suggestion, contactez-moi à : **[votre-email@example.com]**
+Pour toute question ou suggestion, contactez-moi à : **[bennytenezeu@gmail.com]**
 
 ---
 
@@ -207,5 +185,3 @@ Pour toute question ou suggestion, contactez-moi à : **[votre-email@example.com
 *Exemple de l'interface web pour la surveillance en temps réel.*
 
 ---
-
-Avec ce README, votre projet sera bien présenté sur GitHub et attirera l'attention des contributeurs et utilisateurs potentiels. Vous pouvez ajouter des captures d'écran ou des diagrammes pour enrichir encore plus la documentation.
