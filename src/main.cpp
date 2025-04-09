@@ -1,106 +1,76 @@
-#include "FloodAlertSystem.h"
-#include "Config.h"
+/*
+ * Basic example of using an E-Ink display with ESP32
+ * Using the GxEPD2 library with a 2.9" black and white display (GDEH029A1)
+ */
 
-// Inclure les capteurs
-#include "sensors/DHT11Sensor.h"
-#include "sensors/WaterLevelSensor.h"
-#include "indicators/LEDAlertIndicator.h"
-#include "indicators/BuzzerAlertIndicator.h"
+// Include the correct headers
+#include <Arduino.h>
+#include <SPI.h>
+#include <GxEPD2_BW.h> // For black/white displays
+#include <Fonts/FreeMonoBold9pt7b.h>
 
-// Inclure le nouvel encodeur rotatif et le système de menu
-#include "indicators/RotaryEncoder.h"
-#include "Menu.h"
+// Uncomment the correct display driver for your E-Ink display
+// This example is for GDEH029A1 2.9" b/w display
+// See GxEPD2_Example.ino in the GxEPD2 library for more display options
 
-// Inclure le système de logs
-#include "utils/Logger.h"
+// For 2.9" GDEH029A1 display
+GxEPD2_BW<GxEPD2_290, GxEPD2_290::HEIGHT> display(GxEPD2_290(/*CS=*/ 5, /*DC=*/ 17, /*RST=*/ 16, /*BUSY=*/ 4));
 
-#include <Ticker.h>
-Ticker alertTestTicker;
-bool testingAlert = false;
-int testPhase = 0;
-
-// Créer l'instance du système
-FloodAlertSystem floodSystem;
-
-// Créer les instances des indicateurs
-LEDAlertIndicator ledIndicator(LED_RED_PIN, LED_YELLOW_PIN, LED_GREEN_PIN);
-BuzzerAlertIndicator buzzerIndicator(BUZZER_PIN);
-
-// Créer l'instance de l'encodeur rotatif et du menu (uniquement pour le master)
-RotaryEncoder* encoder = nullptr;
-Menu* menu = nullptr;
+// Pin definitions for ESP32
+// BUSY -> GPIO4, RST -> GPIO16, DC -> GPIO17, CS -> GPIO5, CLK -> GPIO18, DIN -> GPIO23
 
 void setup() {
-    Serial.begin(115200);
-    delay(1000);
-    
-    // Initialiser le système de logs
-    Logger::begin(LOG_LEVEL_INFO);
-    
-    Logger::ui("\n\n=== SYSTÈME D'ALERTE DE CRUE ===");
-    Logger::ui("Tapez 'silence' ou 's' pour couper les alertes sonores");
-    Logger::ui("Tapez 'test' ou 't' pour tester les indicateurs");
-    Logger::ui("Utilisez l'encodeur rotatif pour naviguer dans le menu");
-    Logger::ui("Appui long pour activer/désactiver les logs système");
-    
-    // Initialiser le système dans le mode approprié défini dans Config.h
-    bool isMaster = MODE_MASTER;
-    
-    // Initialiser les indicateurs
-    ledIndicator.begin();
-    buzzerIndicator.begin();
-    
-    // Configurer les indicateurs dans le système
-    floodSystem.setLEDIndicator(&ledIndicator);
-    floodSystem.setBuzzerIndicator(&buzzerIndicator);
-    
-    // Initialiser l'encodeur rotatif et le menu si en mode master
-    if (isMaster) {
-        encoder = new RotaryEncoder(ROTARY_ENCODER_DT_PIN, ROTARY_ENCODER_CLK_PIN, ROTARY_ENCODER_SW_PIN);
-        encoder->begin();
-        
-        // Créer et initialiser le système de menu
-        menu = new Menu(encoder);
-        menu->setFloodAlertSystem(&floodSystem);
-        menu->begin();
-        
-        Logger::info("Interface de menu initialisée");
-    }
-    
-    // Initialiser le système
-    floodSystem.begin(isMaster);
-    
-    if (isMaster) {
-        Logger::info("Système initialisé en mode MASTER");
-        
-        // En mode MASTER, ajouter le capteur DHT11
-        floodSystem.addSensor(new DHT11Sensor(DHT11_PIN));
-        Logger::info("Capteur DHT11 ajouté au master");
-    } else {
-        Logger::info("Système initialisé en mode SLAVE");
-        
-        // En mode SLAVE, ajouter le capteur de niveau d'eau
-        floodSystem.addSensor(new WaterLevelSensor(WATER_LEVEL_SENSOR_PIN));
-        Logger::info("Capteur de niveau d'eau ajouté au slave");
-    }
-    
-    // Test initial des indicateurs
-    ledIndicator.setGreen(true);
-    buzzerIndicator.playSuccessTone();
-    
-    Logger::ui("Configuration terminée!");
+  Serial.begin(115200);
+  Serial.println("ESP32 E-Ink Display Example");
+  
+  // Initialize the display
+  display.init();
+  
+  // Set text color, size and font
+  display.setTextColor(GxEPD_BLACK);
+  display.setFont(&FreeMonoBold9pt7b);
+  
+  // Display hello world text
+  displayText("Hello World!", "ESP32 + E-Ink");
+  
+  Serial.println("Display updated - going to sleep");
+  delay(3000); // Wait for serial output to complete
+  
+  // Deep sleep to save power - E-Ink retains image without power
+  esp_deep_sleep_start();
 }
 
 void loop() {
-    // Mettre à jour le système (gère tous les composants)
-    floodSystem.update();
+  // Not used since we're going to deep sleep
+}
+
+void displayText(const char* line1, const char* line2) {
+  int16_t tbx, tby;
+  uint16_t tbw, tbh;
+  
+  // Full screen update
+  display.setFullWindow();
+  
+  // Use firstPage/nextPage for partial refresh displays
+  display.firstPage();
+  do {
+    display.fillScreen(GxEPD_WHITE);
     
-    // Mettre à jour l'encodeur rotatif et le menu si en mode master
-    if (MODE_MASTER && encoder != nullptr && menu != nullptr) {
-        encoder->update();
-        menu->update();
-    }
+    // Position and display first line
+    display.getTextBounds(line1, 0, 0, &tbx, &tby, &tbw, &tbh);
+    uint16_t x = (display.width() - tbw) / 2;
+    uint16_t y = (display.height() / 3);
+    display.setCursor(x, y);
+    display.print(line1);
     
-    // Petite pause pour économiser de l'énergie
-    delay(10);
+    // Position and display second line
+    display.getTextBounds(line2, 0, 0, &tbx, &tby, &tbw, &tbh);
+    x = (display.width() - tbw) / 2;
+    y = (display.height() * 2 / 3);
+    display.setCursor(x, y);
+    display.print(line2);
+    
+  } while (display.nextPage());
+  
+  Serial.println("Display updated");
 }
