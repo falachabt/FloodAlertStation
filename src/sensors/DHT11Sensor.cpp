@@ -25,7 +25,7 @@ void DHT11Sensor::update() {
     
     // Vérifier si la lecture a échoué
     if (isnan(_temperature) || isnan(_humidity)) {
-        Logger::error("Échec de lecture du capteur DHT!");
+        // Logger::error("Échec de lecture du capteur DHT!");
         return;
     }
     
