@@ -1,5 +1,5 @@
 #ifndef CONFIG_H
-#define CONFIG_H
+#define CONFIG_3
 
 // Mode de fonctionnement - changer cette valeur pour compiler soit le master, soit le slave
 #define MODE_MASTER true  // true pour master, false pour slave

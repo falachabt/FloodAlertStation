@@ -239,6 +239,8 @@ void FloodAlertSystem::update()
         _buzzerIndicator->tick();
     }
 
+    updateEInkDisplay();
+
     // Envoyer les données périodiquement
     unsigned long now = millis();
     if (now - _lastStatusUpdate >= 5000)
@@ -588,5 +590,31 @@ void FloodAlertSystem::setBuzzerIndicator(BuzzerAlertIndicator* buzzerIndicator)
 void FloodAlertSystem::silenceAudioAlert() {
     if (_buzzerIndicator != nullptr) {
         _buzzerIndicator->silenceAlert();
+    }
+}
+
+// Set the E-Ink display
+void FloodAlertSystem::setEInkDisplay(EInkDisplay* einkDisplay) {
+    _einkDisplay = einkDisplay;
+    
+    // Set reference to this system for the display
+    if (_einkDisplay) {
+        _einkDisplay->setFloodAlertSystem(this);
+        Logger::info("E-Ink display registered with FloodAlertSystem");
+    }
+}
+
+// New method to handle E-Ink display updates
+void FloodAlertSystem::updateEInkDisplay() {
+    if (_einkDisplay != nullptr) {
+        // Update the display
+        _einkDisplay->update();
+        
+        // Periodic full refresh to prevent ghosting
+        unsigned long now = millis();
+        if (now - _lastEInkUpdate >= 3600000) { // Every hour
+            _lastEInkUpdate = now;
+            _einkDisplay->refresh(); // Force a full refresh
+        }
     }
 }

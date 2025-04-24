@@ -7,6 +7,7 @@
 #include "sensors/SensorBase.h"
 #include "indicators/LEDAlertIndicator.h"
 #include "indicators/BuzzerAlertIndicator.h"
+#include "indicators/EInkDisplay.h" // Add E-Ink display header
 #include <vector>
 
 // Structure pour stocker les données des capteurs
@@ -36,10 +37,12 @@ public:
     // Gestion des indicateurs
     void setLEDIndicator(LEDAlertIndicator* ledIndicator);
     void setBuzzerIndicator(BuzzerAlertIndicator* buzzerIndicator);
+    void setEInkDisplay(EInkDisplay* einkDisplay); // Add E-Ink display setter
     
     // Accès aux indicateurs (ajout pour le système de menu)
     BuzzerAlertIndicator* getBuzzerIndicator() { return _buzzerIndicator; }
     LEDAlertIndicator* getLEDIndicator() { return _ledIndicator; }
+    EInkDisplay* getEInkDisplay() { return _einkDisplay; }
     
     // Silencer l'alerte sonore
     void silenceAudioAlert();
@@ -52,6 +55,13 @@ public:
     FloodAlertNetwork& getNetwork() { return _network; }
     FloodAlertWebServer& getWebServer() { return _webServer; }
     
+    // Accès aux données des capteurs (pour l'affichage)
+    SensorData* getSensorData(int index);
+    int getSensorCount();
+    float getHighestWaterLevel();
+    float getAverageTemperature();
+    uint8_t getHighestAlertCategory();
+    
 private:
     bool _isMaster;
     bool _isRunning = false;
@@ -60,7 +70,9 @@ private:
     std::vector<SensorBase*> _sensors;
     LEDAlertIndicator* _ledIndicator = nullptr;
     BuzzerAlertIndicator* _buzzerIndicator = nullptr;
+    EInkDisplay* _einkDisplay = nullptr; // Add E-Ink display pointer
     unsigned long _lastStatusUpdate = 0;
+    unsigned long _lastEInkUpdate = 0; // Track last E-Ink update time
 
     // Liste des capteurs distants
     SensorData _remoteSensors[MAX_SENSORS];
@@ -83,6 +95,9 @@ private:
     // Callbacks statiques pour FloodAlertNetwork
     static void onMessageReceived(const network_message_t& msg, const uint8_t* mac);
     static void onDataReady(float* data, uint8_t count);
+    
+    // Added: Update E-Ink display with current system state
+    void updateEInkDisplay();
 };
 
 #endif // FLOOD_ALERT_SYSTEM_H
