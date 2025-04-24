@@ -7,6 +7,7 @@
 #include "sensors/SensorBase.h"
 #include "indicators/LEDAlertIndicator.h"
 #include "indicators/BuzzerAlertIndicator.h"
+#include "indicators/ToggleSwitchIndicator.h" // Include toggle switch header
 #include "indicators/EInkDisplay.h" // Add E-Ink display header
 #include <vector>
 
@@ -51,6 +52,10 @@ public:
     void processReceivedMessage(const network_message_t& msg, const uint8_t* mac);
     void processReceivedData(float* data, uint8_t count);
     
+    //  Toogle switch management
+    void setToggleSwitchIndicator(ToggleSwitchIndicator* toggleSwitchIndicator);
+    ToggleSwitchIndicator* getToggleSwitchIndicator() { return _toggleSwitchIndicator; }
+
     // Accès aux composants principaux
     FloodAlertNetwork& getNetwork() { return _network; }
     FloodAlertWebServer& getWebServer() { return _webServer; }
@@ -70,6 +75,7 @@ private:
     std::vector<SensorBase*> _sensors;
     LEDAlertIndicator* _ledIndicator = nullptr;
     BuzzerAlertIndicator* _buzzerIndicator = nullptr;
+    ToggleSwitchIndicator* _toggleSwitchIndicator = nullptr;
     EInkDisplay* _einkDisplay = nullptr; // Add E-Ink display pointer
     unsigned long _lastStatusUpdate = 0;
     unsigned long _lastEInkUpdate = 0; // Track last E-Ink update time

@@ -210,6 +210,27 @@ void BuzzerAlertIndicator::setBuzzer(bool state) {
     // Serial.println(state ? "ON" : "OFF");
 }
 
+void BuzzerAlertIndicator::playSOSTone() {
+    // SOS pattern: ... --- ...
+    for (int i = 0; i < 3; i++) {
+        tone(_buzzerPin, 1000); // Short beep
+        delay(200);
+        noTone(_buzzerPin);
+        delay(200);
+    }
+    
+    delay(600); // Pause between SOS and long beeps
+    
+    for (int i = 0; i < 3; i++) {
+        tone(_buzzerPin, 1000); // Long beep
+        delay(600);
+        noTone(_buzzerPin);
+        delay(200);
+    }
+    
+    delay(600); // Pause before next SOS
+}
+
 void BuzzerAlertIndicator::tick() {
     // This method should be called in every loop iteration
     // to handle alert pattern timing

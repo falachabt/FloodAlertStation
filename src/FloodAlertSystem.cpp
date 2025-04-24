@@ -184,7 +184,7 @@ void FloodAlertSystem::setupWebServer()
         } else {
             _webServer.getServer().send(404, "text/plain", "File not found");
         } });
-        
+
     // API endpoint for silencing audio alerts
     _webServer.on("/api/silence", HTTP_POST, [this]()
                   {
@@ -199,7 +199,7 @@ void FloodAlertSystem::setupWebServer()
 }
 
 // Ajouter un capteur à la liste
-void FloodAlertSystem::addSensor(SensorBase* sensor)
+void FloodAlertSystem::addSensor(SensorBase *sensor)
 {
     _sensors.push_back(sensor);
 
@@ -208,11 +208,10 @@ void FloodAlertSystem::addSensor(SensorBase* sensor)
     {
         sensor->begin();
     }
-    
+
     Serial.print("Added sensor: ");
     Serial.println(sensor->getName());
 }
-
 
 void FloodAlertSystem::update()
 {
@@ -223,6 +222,48 @@ void FloodAlertSystem::update()
     if (_isMaster)
     {
         _webServer.handleClient();
+
+        // toogle switch only for master
+        // Handle toggle switch if available
+        if (_toggleSwitchIndicator != nullptr)
+        {
+            if (_toggleSwitchIndicator->update())
+            {
+                // Toggle state changed
+                if (_toggleSwitchIndicator->isToggleOn())
+                {
+                    // Toggle switched ON - trigger alert sounds
+                    if (_buzzerIndicator != nullptr)
+                    {
+                        _buzzerIndicator->playAlertTone(1);
+                    }
+                }
+                else if (_toggleSwitchIndicator->isToggleOff())
+                {
+                    // Toggle switched OFF - silence alerts
+                    if (_buzzerIndicator != nullptr)
+                    {
+                        _buzzerIndicator->silenceAlert();
+                    }
+                }
+            }
+
+            // If toggle is ON, periodically play buzzer
+            if (_toggleSwitchIndicator->getSwitchState())
+            {
+                static unsigned long lastBuzzerTime = 0;
+                unsigned long currentTime = millis();
+
+                if (currentTime - lastBuzzerTime > 3000)
+                { // Every 3 seconds
+                    lastBuzzerTime = currentTime;
+                    if (_buzzerIndicator != nullptr)
+                    {
+                        _buzzerIndicator->playAlertTone(1);
+                    }
+                }
+            }
+        }
     }
 
     // Mettre à jour les capteurs locaux
@@ -235,7 +276,8 @@ void FloodAlertSystem::update()
     processSerialCommands();
 
     // Mettre à jour le buzzer (pour gérer les motifs d'alerte)
-    if (_buzzerIndicator != nullptr) {
+    if (_buzzerIndicator != nullptr)
+    {
         _buzzerIndicator->tick();
     }
 
@@ -373,30 +415,35 @@ void FloodAlertSystem::updateInactiveSensors()
 // Traiter les commandes reçues par le port série
 void FloodAlertSystem::processSerialCommands()
 {
-    if (Serial.available() > 0) {
+    if (Serial.available() > 0)
+    {
         String command = Serial.readStringUntil('\n');
         command.trim();
-        
-        if (command.equalsIgnoreCase("silence") || command.equalsIgnoreCase("s")) {
+
+        if (command.equalsIgnoreCase("silence") || command.equalsIgnoreCase("s"))
+        {
             silenceAudioAlert();
             Serial.println("Command received: Silencing audio alert");
         }
-        else if (command.equalsIgnoreCase("test") || command.equalsIgnoreCase("t")) {
+        else if (command.equalsIgnoreCase("test") || command.equalsIgnoreCase("t"))
+        {
             // Test the alerts
-            if (_ledIndicator != nullptr) {
+            if (_ledIndicator != nullptr)
+            {
                 _ledIndicator->blinkLED(LED_RED_PIN, 2);
                 _ledIndicator->blinkLED(LED_YELLOW_PIN, 2);
                 _ledIndicator->blinkLED(LED_GREEN_PIN, 2);
             }
-            
-            if (_buzzerIndicator != nullptr) {
+
+            if (_buzzerIndicator != nullptr)
+            {
                 _buzzerIndicator->playWarningTone();
                 delay(500);
                 _buzzerIndicator->playAlertTone(0);
                 delay(500);
                 _buzzerIndicator->playSuccessTone();
             }
-            
+
             Serial.println("Command received: Testing alerts");
         }
     }
@@ -459,42 +506,49 @@ void FloodAlertSystem::sendSensorData()
 }
 
 // Traiter les données des capteurs reçues du réseau
-void FloodAlertSystem::handleSensorData(const float* data, uint8_t count, const uint8_t* mac, const char* sensorName) {
+void FloodAlertSystem::handleSensorData(const float *data, uint8_t count, const uint8_t *mac, const char *sensorName)
+{
     // Find an existing slot or create a new one
     int idx = -1;
-    
+
     // Look for the sensor by its MAC address
-    for (int i = 0; i < MAX_SENSORS; i++) {
-        if (_remoteSensors[i].active && memcmp(_remoteSensors[i].mac, mac, 6) == 0) {
+    for (int i = 0; i < MAX_SENSORS; i++)
+    {
+        if (_remoteSensors[i].active && memcmp(_remoteSensors[i].mac, mac, 6) == 0)
+        {
             idx = i;
             break;
         }
     }
-    
+
     // If not found, look for a free slot
-    if (idx < 0) {
-        for (int i = 0; i < MAX_SENSORS; i++) {
-            if (!_remoteSensors[i].active) {
+    if (idx < 0)
+    {
+        for (int i = 0; i < MAX_SENSORS; i++)
+        {
+            if (!_remoteSensors[i].active)
+            {
                 idx = i;
                 _remoteSensorCount++;
                 break;
             }
         }
     }
-    
+
     // If no slot available, quit
-    if (idx < 0) {
+    if (idx < 0)
+    {
         Serial.println("No free slots for new sensor data");
         return;
     }
-    
+
     // Initialize or update sensor data
     memcpy(_remoteSensors[idx].mac, mac, 6);
     _remoteSensors[idx].active = true;
-    
+
     // Update sensor name
     strncpy(_remoteSensors[idx].name, sensorName, sizeof(_remoteSensors[idx].name) - 1);
-    
+
     // Update values according to expected format
     if (count >= 1)
         _remoteSensors[idx].waterLevel = data[0]; // First field = water level
@@ -502,12 +556,12 @@ void FloodAlertSystem::handleSensorData(const float* data, uint8_t count, const 
         _remoteSensors[idx].temperature = data[1]; // Second field = temperature
     if (count >= 3)
         _remoteSensors[idx].category = (uint8_t)data[2]; // Third field = category
-    
+
     _remoteSensors[idx].lastSeen = millis();
-    
+
     // Update indicators based on water level data
     updateIndicators(_remoteSensors[idx].waterLevel, _remoteSensors[idx].category);
-    
+
     // Debug output
     Serial.print("Received from ");
     Serial.print(_remoteSensors[idx].name);
@@ -558,63 +612,83 @@ void FloodAlertSystem::handleSensorData(const float* data, uint8_t count, const 
 }
 
 // Update both LED and Buzzer indicators with the same data
-void FloodAlertSystem::updateIndicators(float waterLevel, uint8_t category) {
+void FloodAlertSystem::updateIndicators(float waterLevel, uint8_t category)
+{
     Serial.println("\n--- Updating Indicators ---");
     Serial.print("Water Level: ");
     Serial.print(waterLevel);
     Serial.print(" cm, Category: ");
     Serial.println(category);
-    
+
     // Update LED indicator if available
-    if (_ledIndicator != nullptr) {
+    if (_ledIndicator != nullptr)
+    {
         _ledIndicator->update(waterLevel, category);
     }
-    
+
     // Update Buzzer indicator if available
-    if (_buzzerIndicator != nullptr) {
+    if (_buzzerIndicator != nullptr)
+    {
         _buzzerIndicator->update(waterLevel, category);
     }
 }
 
 // Set the LED indicator
-void FloodAlertSystem::setLEDIndicator(LEDAlertIndicator* ledIndicator) {
+void FloodAlertSystem::setLEDIndicator(LEDAlertIndicator *ledIndicator)
+{
     _ledIndicator = ledIndicator;
 }
 
 // Set the Buzzer indicator
-void FloodAlertSystem::setBuzzerIndicator(BuzzerAlertIndicator* buzzerIndicator) {
+void FloodAlertSystem::setBuzzerIndicator(BuzzerAlertIndicator *buzzerIndicator)
+{
     _buzzerIndicator = buzzerIndicator;
 }
 
 // Silence the audio alert
-void FloodAlertSystem::silenceAudioAlert() {
-    if (_buzzerIndicator != nullptr) {
+void FloodAlertSystem::silenceAudioAlert()
+{
+    if (_buzzerIndicator != nullptr)
+    {
         _buzzerIndicator->silenceAlert();
     }
 }
 
+// E-ink display management
 // Set the E-Ink display
-void FloodAlertSystem::setEInkDisplay(EInkDisplay* einkDisplay) {
+void FloodAlertSystem::setEInkDisplay(EInkDisplay *einkDisplay)
+{
     _einkDisplay = einkDisplay;
-    
+
     // Set reference to this system for the display
-    if (_einkDisplay) {
+    if (_einkDisplay)
+    {
         _einkDisplay->setFloodAlertSystem(this);
         Logger::info("E-Ink display registered with FloodAlertSystem");
     }
 }
 
 // New method to handle E-Ink display updates
-void FloodAlertSystem::updateEInkDisplay() {
-    if (_einkDisplay != nullptr) {
+void FloodAlertSystem::updateEInkDisplay()
+{
+    if (_einkDisplay != nullptr)
+    {
         // Update the display
         _einkDisplay->update();
-        
+
         // Periodic full refresh to prevent ghosting
         unsigned long now = millis();
-        if (now - _lastEInkUpdate >= 3600000) { // Every hour
+        if (now - _lastEInkUpdate >= 3600000)
+        { // Every hour
             _lastEInkUpdate = now;
             _einkDisplay->refresh(); // Force a full refresh
         }
     }
+}
+
+// Toggle switch management
+// Toogle switch indicator set
+void FloodAlertSystem::setToggleSwitchIndicator(ToggleSwitchIndicator *toggleSwitchIndicator)
+{
+    _toggleSwitchIndicator = toggleSwitchIndicator;
 }

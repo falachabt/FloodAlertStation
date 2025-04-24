@@ -24,6 +24,7 @@ FloodAlertSystem floodSystem;
 LEDAlertIndicator ledIndicator(LED_RED_PIN, LED_YELLOW_PIN, LED_GREEN_PIN);
 BuzzerAlertIndicator buzzerIndicator(BUZZER_PIN);
 EInkDisplay einkDisplay(5, 17, 16, 4); // Create E-Ink display with default pins
+ToggleSwitchIndicator toggleSwitchIndicator(TOGGLE_SWITCH_PIN, ADDITIONAL_LED_PIN);
 
 // Créer l'instance de l'encodeur rotatif et du menu (uniquement pour le master)
 RotaryEncoder* encoder = nullptr;
@@ -54,7 +55,8 @@ void setup() {
     floodSystem.setLEDIndicator(&ledIndicator);
     floodSystem.setBuzzerIndicator(&buzzerIndicator);
     floodSystem.setEInkDisplay(&einkDisplay); // Set E-Ink display
-    
+    floodSystem.setToggleSwitchIndicator(&toggleSwitchIndicator);
+
     // Initialiser l'encodeur rotatif et le menu si en mode master
     if (isMaster) {
         encoder = new RotaryEncoder(ROTARY_ENCODER_DT_PIN, ROTARY_ENCODER_CLK_PIN, ROTARY_ENCODER_SW_PIN);

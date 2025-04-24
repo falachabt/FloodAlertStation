@@ -1,6 +1,12 @@
 #ifndef CONFIG_H
 #define CONFIG_3
 
+// E-Ink Display Pins (commented for reference)
+// E_INK_CS_PIN    5   // Chip Select
+// E_INK_DC_PIN    17  // Data/Command
+// E_INK_RST_PIN   16  // Reset
+// E_INK_BUSY_PIN  4   // Busy status
+
 // Mode de fonctionnement - changer cette valeur pour compiler soit le master, soit le slave
 #define MODE_MASTER true  // true pour master, false pour slave
 
@@ -29,6 +35,10 @@
 #define LED_RED_PIN 22              // GPIO pour la LED rouge
 #define LED_YELLOW_PIN 4            // GPIO pour la LED jaune
 #define LED_GREEN_PIN 23            // GPIO pour la LED verte
+
+// Configuration toogle swtich + led
+#define TOGGLE_SWITCH_PIN 32     // GPIO pin for toggle switch input
+#define ADDITIONAL_LED_PIN 25    // GPIO pin for additional LED
 
 // Configuration du buzzer pour les alertes sonores
 #define BUZZER_PIN 15               // GPIO pour le buzzer
