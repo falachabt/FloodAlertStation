@@ -50,6 +50,7 @@ void setup() {
     ledIndicator.begin();
     buzzerIndicator.begin();
     einkDisplay.begin(); // Initialize E-Ink display
+    toggleSwitchIndicator.begin(); // Initialize toggle switch indicator
     
     // Configurer les indicateurs dans le système
     floodSystem.setLEDIndicator(&ledIndicator);

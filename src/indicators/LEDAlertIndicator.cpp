@@ -27,6 +27,8 @@ bool LEDAlertIndicator::begin() {
 
 void LEDAlertIndicator::update(float waterLevel, uint8_t category) {
     unsigned long currentTime = millis();
+
+    Logger::debugF("LED Indicator update - Water level: %.2f cm, Category: %d", waterLevel, category);
     
     // Print debug info to help troubleshoot
     // Serial.print("LED Indicator update - Water level: ");
@@ -111,6 +113,8 @@ void LEDAlertIndicator::update(float waterLevel, uint8_t category) {
 
 void LEDAlertIndicator::showAlert(bool isAlert) {
     _alertState = isAlert;
+
+    Logger::infoF("Alert state changed to: %s", isAlert ? "ACTIVE" : "INACTIVE");
     
     // Serial.print("Alert state changed to: ");
     // Serial.println(isAlert ? "ACTIVE" : "INACTIVE");

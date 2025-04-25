@@ -40,6 +40,11 @@ void BuzzerAlertIndicator::update(float waterLevel, uint8_t category) {
     // Serial.println(_alertState ? "ON" : "OFF");
     
     // Store the current time when we first detect a category change
+    bool shouldSilenceBuz = digitalRead(STOP_BUZZER_PIN_WATER);
+    if (shouldSilenceBuz && (category != 0 || _lastCategory != 0)) {
+        silenceAlert();
+    }
+
     if (category != _lastCategory) {
         // Serial.print("Category changed from ");
         // Serial.print(_lastCategory);

@@ -223,10 +223,13 @@ void FloodAlertSystem::update()
     {
         _webServer.handleClient();
 
+        
+
         // toogle switch only for master
         // Handle toggle switch if available
         if (_toggleSwitchIndicator != nullptr)
         {
+
             if (_toggleSwitchIndicator->update())
             {
                 // Toggle state changed
@@ -582,12 +585,15 @@ void FloodAlertSystem::handleSensorData(const float *data, uint8_t count, const 
     Serial.print("Category: ");
     Serial.print(_remoteSensors[idx].category);
     Serial.print(" (");
+    Logger::infoF("nmmmmm  1073496478: %d", _remoteSensors[idx].name);
     switch (_remoteSensors[idx].category)
     {
     case 0:
         Serial.print("Normal");
+      
         break;
     case 1:
+       
         Serial.print("Warning");
         break;
     case 2:
@@ -625,11 +631,27 @@ void FloodAlertSystem::updateIndicators(float waterLevel, uint8_t category)
     {
         _ledIndicator->update(waterLevel, category);
     }
+    else
+    {
+        Logger::info("LED Indicator not available");
+    }
 
     // Update Buzzer indicator if available
     if (_buzzerIndicator != nullptr)
     {
         _buzzerIndicator->update(waterLevel, category);
+        switch (category)
+        {
+        case 0:
+            _ledIndicator->setRed(false);
+            break;
+            case 1: 
+            _ledIndicator->setRed(false);
+            break;
+            case 2:
+            _ledIndicator->setRed(true);
+            break;
+        }
     }
 }
 

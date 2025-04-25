@@ -32,9 +32,9 @@
 #define TEMP_WARNING_THRESHOLD 35    // Seuil d'avertissement de température
 
 // Configuration des LEDs pour les alertes visuelles
+#define LED_GREEN_PIN 23             // GPIO pour la LED verte
 #define LED_RED_PIN 22              // GPIO pour la LED rouge
 #define LED_YELLOW_PIN 4            // GPIO pour la LED jaune
-#define LED_GREEN_PIN 23            // GPIO pour la LED verte
 
 // Configuration toogle swtich + led
 #define TOGGLE_SWITCH_PIN 32     // GPIO pin for toggle switch input
@@ -42,6 +42,8 @@
 
 // Configuration du buzzer pour les alertes sonores
 #define BUZZER_PIN 15               // GPIO pour le buzzer
+#define STOP_BUZZER_PIN_WATER 2            // GPIO pour le bouton d'arrêt du buzzer
+#define STOP_BUZZER_PIN_TEMP 13             // GPIO pour le bouton d'arrêt du prev  
 
 // Configuration de l'encodeur rotatif (pour l'interface utilisateur du master)
 #define ROTARY_ENCODER_DT_PIN 14    // GPIO pour la broche DT de l'encodeur
