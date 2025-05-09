@@ -40,6 +40,11 @@ void BuzzerAlertIndicator::update(float waterLevel, uint8_t category) {
     // Serial.println(_alertState ? "ON" : "OFF");
     
     // Store the current time when we first detect a category change
+    bool shouldSilenceBuz = digitalRead(STOP_BUZZER_PIN_WATER);
+    if (shouldSilenceBuz && (category != 0 || _lastCategory != 0)) {
+        silenceAlert();
+    }
+
     if (category != _lastCategory) {
         // Serial.print("Category changed from ");
         // Serial.print(_lastCategory);
@@ -208,6 +213,27 @@ void BuzzerAlertIndicator::setBuzzer(bool state) {
     _toneState = state;
     // Serial.print("Buzzer: ");
     // Serial.println(state ? "ON" : "OFF");
+}
+
+void BuzzerAlertIndicator::playSOSTone() {
+    // SOS pattern: ... --- ...
+    for (int i = 0; i < 3; i++) {
+        tone(_buzzerPin, 1000); // Short beep
+        delay(200);
+        noTone(_buzzerPin);
+        delay(200);
+    }
+    
+    delay(600); // Pause between SOS and long beeps
+    
+    for (int i = 0; i < 3; i++) {
+        tone(_buzzerPin, 1000); // Long beep
+        delay(600);
+        noTone(_buzzerPin);
+        delay(200);
+    }
+    
+    delay(600); // Pause before next SOS
 }
 
 void BuzzerAlertIndicator::tick() {

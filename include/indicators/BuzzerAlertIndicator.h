@@ -32,6 +32,7 @@ public:
     void playWarningTone();
     void playErrorTone();
     void playSuccessTone();
+    void playSOSTone();
     
     // Direct control of buzzer
     void setBuzzer(bool state);
